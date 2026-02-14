@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+##### Custom Settings #####
+# image files
+*.jpg
+*.png
+
+# date files
+fish_images*.jsonl
+
+# cache files
+*.cache
