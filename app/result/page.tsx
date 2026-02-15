@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ResultDisplay from '@/components/ResultDisplay';
 import { QuizMode } from '@/lib/types';
 import { loadRetryData } from '@/lib/quizLogic';
+import { saveScoreHistory } from '@/lib/historyLogic';
 
 function ResultPageContent() {
   const router = useRouter();
@@ -14,11 +15,20 @@ function ResultPageContent() {
   const total = parseInt(searchParams.get('total') || '0', 10);
   const mode = (searchParams.get('mode') as QuizMode) || 'normal';
   const [hasRetryData, setHasRetryData] = useState(false);
+  const hasSavedHistory = useRef(false);
 
   useEffect(() => {
     const retryData = loadRetryData();
     setHasRetryData(retryData !== null && retryData.questions.length > 0);
   }, [mode]);
+
+  // スコア履歴を保存（通常モードのみ、1回のみ実行）
+  useEffect(() => {
+    if (mode === 'normal' && !isNaN(score) && !isNaN(total) && total > 0 && !hasSavedHistory.current) {
+      saveScoreHistory(score, total, mode);
+      hasSavedHistory.current = true;
+    }
+  }, [score, total, mode]);
 
   const handleRetry = () => {
     router.push('/');

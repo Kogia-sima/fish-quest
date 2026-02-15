@@ -387,10 +387,18 @@ export default function SettingsForm({
             >
               {filteredCount === 0 ? '魚を選択してください' : 'クイズを始める 🐟'}
             </button>
+
+            {/* History Button */}
+            <button
+              onClick={() => router.push('/history')}
+              className="w-full py-4 px-8 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white text-lg font-bold rounded-2xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-6"
+            >
+              スコア履歴を見る 📊
+            </button>
           </div>
 
           {/* Footer hint */}
-          <p className="text-center text-cyan-300/50 text-sm mt-6 animate-fade-in-delayed-6">
+          <p className="text-center text-cyan-300/50 text-sm mt-6 animate-fade-in-delayed-7">
             選択しない場合は、すべての魚からランダムに出題されます
           </p>
         </div>

@@ -50,3 +50,23 @@ export interface RetryQuizData {
  * クイズモードの型定義
  */
 export type QuizMode = 'normal' | 'retry';
+
+/**
+ * スコア履歴のエントリー
+ */
+export interface ScoreHistoryEntry {
+  id: string;
+  timestamp: number;
+  score: number;
+  total: number;
+  percentage: number;
+  mode: QuizMode;
+}
+
+/**
+ * スコア履歴の全体データ
+ */
+export interface ScoreHistory {
+  entries: ScoreHistoryEntry[];
+  version: number;
+}
