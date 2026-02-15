@@ -1,9 +1,15 @@
+/**
+ * 魚データ読み込みモジュール
+ * サーバーサイドでのJSONLファイル読み込みと、共通ユーティリティ関数の再エクスポートを提供する
+ * @module fishData
+ */
 import fs from 'fs';
 import path from 'path';
 import { FishData } from './types';
 
 /**
  * JSONLファイルから魚データを読み込む（サーバーサイド専用）
+ * public/fish_images.jsonl を読み込み、各行をJSONとしてパースする
  * @returns 魚データの配列
  */
 export async function loadFishData(): Promise<FishData[]> {
@@ -13,7 +19,8 @@ export async function loadFishData(): Promise<FishData[]> {
   return lines.map(line => JSON.parse(line));
 }
 
-// クライアント/サーバー共通の関数は fishUtils.ts から再エクスポート
+// クライアント/サーバー共通の関数を fishUtils.ts から再エクスポート
+// これにより、サーバーコンポーネントで一箇所からすべての関数をインポート可能
 export {
   getAllCategories,
   getAllClassifications,

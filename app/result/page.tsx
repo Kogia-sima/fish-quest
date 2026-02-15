@@ -1,3 +1,9 @@
+/**
+ * クイズ結果ページ
+ * URL Paramsからスコアを取得し、ResultDisplayコンポーネントで表示する
+ * 再挑戦ボタンと復習ボタンを提供する
+ * @module app/result/page
+ */
 'use client';
 
 import { Suspense, useEffect, useState, useRef } from 'react';
@@ -7,22 +13,29 @@ import { QuizMode } from '@/lib/types';
 import { loadRetryData } from '@/lib/quizLogic';
 import { saveScoreHistory } from '@/lib/historyLogic';
 
+/**
+ * 結果ページのメインコンテンツコンポーネント
+ */
 function ResultPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // URL Paramsからスコアと設定を取得
+  // 例: /result?score=8&total=10&mode=normal
   const score = parseInt(searchParams.get('score') || '0', 10);
   const total = parseInt(searchParams.get('total') || '0', 10);
   const mode = (searchParams.get('mode') as QuizMode) || 'normal';
   const [hasRetryData, setHasRetryData] = useState(false);
-  const hasSavedHistory = useRef(false);
+  const hasSavedHistory = useRef(false); // 重複保存防止用フラグ
 
+  // sessionStorageに復習データがあるか確認
   useEffect(() => {
     const retryData = loadRetryData();
     setHasRetryData(retryData !== null && retryData.questions.length > 0);
   }, [mode]);
 
   // スコア履歴を保存（通常モードのみ、1回のみ実行）
+  // 復習モードではスコア履歴を保存しない（元のクイズ結果と重複するため）
   useEffect(() => {
     if (mode === 'normal' && !isNaN(score) && !isNaN(total) && total > 0 && !hasSavedHistory.current) {
       saveScoreHistory(score, total, mode);
@@ -30,10 +43,18 @@ function ResultPageContent() {
     }
   }, [score, total, mode]);
 
+  /**
+   * 再挑戦ボタンのハンドラー
+   * トップ画面（設定画面）に戻る
+   */
   const handleRetry = () => {
     router.push('/');
   };
 
+  /**
+   * 復習ボタンのハンドラー
+   * 間違えた問題のみで復習クイズを開始（sessionStorageから取得）
+   */
   const handleRetryWrong = () => {
     router.push('/quiz?mode=retry');
   };

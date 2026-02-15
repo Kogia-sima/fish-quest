@@ -1,3 +1,15 @@
+/**
+ * クイズ設定フォームコンポーネント
+ * カテゴリー、分類、レア度による魚のフィルタリング機能を提供する
+ *
+ * 主な機能:
+ * - ポータルによるドロップダウンメニュー（スクロール位置に追従）
+ * - カスタムフック（useToggleSelection, useClickOutside）
+ * - リアルタイムフィルタリング結果表示
+ * - カテゴリー選択に応じた分類の動的フィルタリング
+ *
+ * @module components/SettingsForm
+ */
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -7,25 +19,55 @@ import { FishData } from '@/lib/types';
 import { getClassificationsByCategories, filterFishData } from '@/lib/fishUtils';
 import { clearRetryData } from '@/lib/quizLogic';
 
+/**
+ * SettingsFormコンポーネントのProps
+ */
 interface SettingsFormProps {
+  /** 全カテゴリーの配列 */
   allCategories: string[];
+  /** 全分類の配列 */
   allClassifications: string[];
+  /** 全レア度の配列 */
   allRarities: number[];
+  /** 魚データ全体の配列 */
   fishData: FishData[];
 }
 
-// Helper functions
+// ========================================
+// ヘルパー関数
+// ========================================
+
+/**
+ * 配列をソートし「その他」を末尾に配置する
+ * カテゴリー/分類のUI表示で一般的な項目を優先するため
+ * @param items ソート対象の文字列配列
+ * @returns ソート済み配列（「その他」は最後尾）
+ */
 function sortWithOtherLast(items: string[]): string[] {
   const others = items.filter(item => item === 'その他');
   const nonOthers = items.filter(item => item !== 'その他').sort();
   return [...nonOthers, ...others];
 }
 
-// Custom hooks
+// ========================================
+// カスタムフック
+// ========================================
+
+/**
+ * 複数選択状態を管理するカスタムフック
+ * チェックボックスのトグル動作を抽象化する
+ * @template T 選択項目の型
+ * @param initialValue 初期選択項目の配列
+ * @returns オブジェクト - 選択状態と操作関数
+ * @returns {T[]} selected 現在選択されている項目
+ * @returns {function(T[]): void} setSelected 選択状態を直接設定
+ * @returns {function(T): void} toggle 項目のトグル（追加/削除）
+ */
 function useToggleSelection<T>(initialValue: T[] = []) {
   const [selected, setSelected] = useState<T[]>(initialValue);
 
   const toggle = useCallback((item: T) => {
+    // 既に選択済みなら削除、未選択なら追加
     setSelected(prev =>
       prev.includes(item)
         ? prev.filter(i => i !== item)
@@ -36,6 +78,14 @@ function useToggleSelection<T>(initialValue: T[] = []) {
   return { selected, setSelected, toggle };
 }
 
+/**
+ * ドロップダウンの外側クリックを検出してメニューを閉じるカスタムフック
+ * ポータル化されたドロップダウンの制御に使用する
+ * @param ref 監視対象要素のref
+ * @param isOpen ドロップダウンの開閉状態
+ * @param onClose 閉じる際のコールバック
+ * @param dataAttribute ドロップダウン識別用のdata属性値
+ */
 function useClickOutside(
   ref: React.RefObject<HTMLElement | null>,
   isOpen: boolean,
@@ -47,6 +97,7 @@ function useClickOutside(
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
+      // ref要素の外側かつ、ドロップダウン要素自身でもない場合にクローズ
       if (
         ref.current &&
         !ref.current.contains(target) &&
@@ -61,37 +112,55 @@ function useClickOutside(
   }, [isOpen, ref, onClose, dataAttribute]);
 }
 
-// Shared components
+// ========================================
+// 共通コンポーネント
+// ========================================
+
+/**
+ * DropdownPortalのProps
+ */
 interface DropdownPortalProps {
+  /** メニューの表示状態 */
   isOpen: boolean;
+  /** 親ボタン要素のref */
   buttonRef: React.RefObject<HTMLButtonElement | null>;
+  /** メニュー内容 */
   children: React.ReactNode;
+  /** 識別用data属性値 */
   dataDropdown: string;
 }
 
+/**
+ * ドロップダウンメニューをポータル化するコンポーネント
+ * ボタン位置に追従し、スクロール/リサイズ時に自動再配置する
+ * Hydration mismatchを防ぐためmounted状態を使用
+ * @param props DropdownPortalProps
+ */
 function DropdownPortal({ isOpen, buttonRef, children, dataDropdown }: DropdownPortalProps) {
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const [mounted, setMounted] = useState(false);
 
-  // Set mounted to true after first render to avoid hydration mismatch
+  // マウント後にtrueに設定（Hydration mismatch回避）
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // ボタン位置を監視し、ドロップダウンの位置を更新
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const updatePosition = () => {
         const rect = buttonRef.current?.getBoundingClientRect();
         if (rect) {
           setPosition({
-            top: rect.bottom + 8,
+            top: rect.bottom + 8, // ボタンの下側に8px間隔
             left: rect.left,
-            width: rect.width,
+            width: rect.width, // ボタンと同じ幅
           });
         }
       };
 
       updatePosition();
+      // リサイズ・スクロール時に位置を再計算
       window.addEventListener('resize', updatePosition);
       window.addEventListener('scroll', updatePosition, true);
 
@@ -104,6 +173,7 @@ function DropdownPortal({ isOpen, buttonRef, children, dataDropdown }: DropdownP
 
   if (!mounted || !isOpen) return null;
 
+  // document.body直下にレンダリング（z-indexの問題を回避）
   return createPortal(
     <div
       className="fixed z-[90] max-h-64 overflow-y-auto bg-slate-900 border-2 border-cyan-500/30 rounded-2xl shadow-2xl shadow-cyan-500/20 animate-dropdown-open"
@@ -120,13 +190,26 @@ function DropdownPortal({ isOpen, buttonRef, children, dataDropdown }: DropdownP
   );
 }
 
+/**
+ * SelectedChipsのProps
+ * @template T 選択項目の型
+ */
 interface SelectedChipsProps<T> {
+  /** 選択されている項目の配列 */
   items: T[];
+  /** 項目削除時のコールバック */
   onRemove: (item: T) => void;
+  /** 項目のラベルをレンダリングする関数 */
   renderLabel: (item: T) => string;
+  /** チップの背景色クラス */
   colorClass: string;
 }
 
+/**
+ * 選択された項目をチップ形式で表示するコンポーネント
+ * @template T 選択項目の型
+ * @param props SelectedChipsProps
+ */
 function SelectedChips<T>({ items, onRemove, renderLabel, colorClass }: SelectedChipsProps<T>) {
   if (items.length === 0) return null;
 
@@ -150,20 +233,41 @@ function SelectedChips<T>({ items, onRemove, renderLabel, colorClass }: Selected
   );
 }
 
+/**
+ * FilterDropdownのProps
+ * @template T フィルター項目の型
+ */
 interface FilterDropdownProps<T> {
+  /** ドロップダウンのラベル */
   label: string;
+  /** 選択可能な項目の配列 */
   items: T[];
+  /** 現在選択されている項目の配列 */
   selectedItems: T[];
+  /** 項目トグル時のコールバック */
   onToggle: (item: T) => void;
+  /** 項目のラベルをレンダリングする関数 */
   renderLabel: (item: T) => string;
+  /** プレースホルダーテキスト */
   placeholder: string;
+  /** 項目が空の場合のプレースホルダー（オプション） */
   emptyPlaceholder?: string;
+  /** 無効化フラグ */
   disabled?: boolean;
+  /** 識別用data属性値 */
   dataDropdown: string;
+  /** 選択チップの背景色クラス */
   chipColorClass: string;
+  /** フェードインアニメーションの遅延クラス */
   delayClass: string;
 }
 
+/**
+ * 汎用フィルタードロップダウンコンポーネント
+ * ポータル化されたドロップダウンメニューでチェックボックス選択を提供する
+ * @template T フィルター項目の型
+ * @param props FilterDropdownProps
+ */
 function FilterDropdown<T>({
   label,
   items,
@@ -182,6 +286,7 @@ function FilterDropdown<T>({
 
   useClickOutside(buttonRef, isOpen, () => setIsOpen(false), dataDropdown);
 
+  // ボタンに表示するテキストを決定
   const buttonText = disabled && items.length === 0
     ? emptyPlaceholder || placeholder
     : selectedItems.length === 0
@@ -247,6 +352,10 @@ function FilterDropdown<T>({
   );
 }
 
+/**
+ * クイズ設定フォームのメインコンポーネント
+ * @param props SettingsFormProps
+ */
 export default function SettingsForm({
   allCategories,
   allClassifications,
@@ -254,33 +363,41 @@ export default function SettingsForm({
   fishData,
 }: SettingsFormProps) {
   const router = useRouter();
+  // 3つのフィルター用の選択状態を管理
   const { selected: selectedCategories, setSelected: setSelectedCategories, toggle: toggleCategory } = useToggleSelection<string>();
   const { selected: selectedClassifications, setSelected: setSelectedClassifications, toggle: toggleClassification } = useToggleSelection<string>();
   const { selected: selectedRarities, toggle: toggleRarity } = useToggleSelection<number>();
 
   // 選択されたカテゴリーに基づいて利用可能な分類を動的に取得
+  // 例: 「カレイの仲間」を選択した場合、「カレイ科」「ヒラメ科」などの分類のみが表示される
   const availableClassifications = useMemo(() => {
     return getClassificationsByCategories(fishData, selectedCategories);
   }, [fishData, selectedCategories]);
 
-  // カテゴリーが変更されたら、無効な分類を削除
+  // カテゴリーが変更されたら、無効な分類を自動削除
+  // 例: 「カレイの仲間」カテゴリーを解除したら、「カレイ科」「ヒラメ科」分類も自動削除
   useEffect(() => {
     setSelectedClassifications(prev =>
       prev.filter(c => availableClassifications.includes(c))
     );
   }, [availableClassifications, setSelectedClassifications]);
 
-  // フィルタリングされた魚の数を計算
+  // フィルタリングされた魚の数を計算（リアルタイム更新）
   const filteredCount = useMemo(() => {
     return filterFishData(fishData, selectedCategories, selectedClassifications, selectedRarities).length;
   }, [fishData, selectedCategories, selectedClassifications, selectedRarities]);
 
+  /**
+   * クイズ開始ボタンのハンドラー
+   * フィルター条件をURLパラメータとしてクイズページに渡す
+   */
   const handleStartQuiz = () => {
     if (filteredCount === 0) return;
 
-    // 古い復習データをクリア
+    // 古い復習データをクリア（新しいクイズを開始するため）
     clearRetryData();
 
+    // フィルター条件をURLパラメータに変換
     const params = new URLSearchParams();
     if (selectedCategories.length > 0) {
       params.set('categories', selectedCategories.join(','));
@@ -439,9 +556,10 @@ export default function SettingsForm({
           transform-origin: top center;
         }
 
-        /* モバイル端末ではアニメーション完全無効化 + パフォーマンス最適化 */
+        /* モバイル端末でのパフォーマンス最適化 */
+        /* レンダリング負荷を軽減するため、アニメーションとエフェクトを無効化 */
         @media (max-width: 768px) {
-          /* すべてのアニメーションを無効化 */
+          /* すべてのアニメーションを無効化してGPU負荷を軽減 */
           .animate-fade-in,
           .animate-fade-in-delayed-1,
           .animate-fade-in-delayed-2,
@@ -455,18 +573,18 @@ export default function SettingsForm({
             animation: none !important;
           }
 
-          /* shadowを軽量化 */
+          /* shadowを軽量化してペイント処理を高速化 */
           .shadow-2xl {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
           }
 
-          /* transition-allを無効化 */
+          /* transition-allを無効化してレイアウト再計算を削減 */
           .transition-all {
             transition: none !important;
           }
         }
 
-        /* ユーザーがアニメーション削減を希望する場合は無効化 */
+        /* ユーザーがアニメーション削減を希望する場合は無効化（アクセシビリティ対応） */
         @media (prefers-reduced-motion: reduce) {
           * {
             animation-duration: 0.01ms !important;

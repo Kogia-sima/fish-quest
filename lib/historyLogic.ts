@@ -1,11 +1,22 @@
+/**
+ * スコア履歴管理モジュール
+ * LocalStorageを使用してクイズの正解率履歴を永続化・管理する
+ * 最大50件までの履歴を保持し、統計情報の計算機能を提供する
+ * @module historyLogic
+ */
 import { ScoreHistory, ScoreHistoryEntry, QuizMode } from './types';
 
+// LocalStorageのキー
 const STORAGE_KEY = 'fish-quiz-score-history';
+// 保持する履歴の最大件数（これを超えると古いものから削除される）
 const MAX_ENTRIES = 50;
+// データ構造のバージョン（将来の互換性のため）
 const CURRENT_VERSION = 1;
 
 /**
- * ユニークIDを生成
+ * ユニークIDを生成する
+ * タイムスタンプとランダム文字列を組み合わせてユニークなIDを作成する
+ * @returns ユニークID文字列（例: "1234567890-abc123def"）
  */
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -104,9 +115,12 @@ export function getHistoryStats(entries: ScoreHistoryEntry[]) {
   const bestScore = Math.max(...entries.map(e => e.percentage));
 
   // 最近5件のトレンド（上昇傾向なら正、下降傾向なら負）
+  // 直近5件の平均と、その前の5件（6-10番目）の平均を比較してトレンドを算出
   const recent = entries.slice(0, Math.min(5, count));
   const recentAvg = recent.reduce((sum, e) => sum + e.percentage, 0) / recent.length;
-  const olderAvg = entries.slice(5, Math.min(10, count)).reduce((sum, e) => sum + e.percentage, 0) / Math.max(1, entries.slice(5, 10).length);
+  const older = entries.slice(5, Math.min(10, count));
+  const olderAvg = older.reduce((sum, e) => sum + e.percentage, 0) / Math.max(1, older.length);
+  // 正の値: 最近のスコアが向上、負の値: 最近のスコアが低下
   const recentTrend = recentAvg - olderAvg;
 
   return {

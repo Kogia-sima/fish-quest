@@ -1,17 +1,40 @@
+/**
+ * クイズ結果表示コンポーネント
+ *
+ * 主な機能:
+ * - スコアの円形グラフアニメーション
+ * - 正解率に応じた色・メッセージ・絵文字の動的変更
+ * - 復習モードのサポート
+ * - 高得点時の紙吹雪エフェクト
+ *
+ * @module components/ResultDisplay
+ */
 'use client';
 
 import { useEffect, useState } from 'react';
 import { getScoreMessage } from '@/lib/quizLogic';
 import { QuizMode } from '@/lib/types';
 
+/**
+ * ResultDisplayコンポーネントのProps
+ */
 interface ResultDisplayProps {
+  /** 正解数 */
   score: number;
+  /** 総問題数 */
   total: number;
+  /** 再挑戦のコールバック */
   onRetry: () => void;
+  /** 間違えた問題のみ復習するコールバック（オプション） */
   onRetryWrong?: () => void;
+  /** クイズモード（'normal' | 'retry'） */
   mode?: QuizMode;
 }
 
+/**
+ * クイズ結果を表示するメインコンポーネント
+ * @param props ResultDisplayProps
+ */
 export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mode = 'normal' }: ResultDisplayProps) {
   const wrongCount = total - score;
   const isRetryMode = mode === 'retry';
@@ -20,25 +43,41 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
   const message = getScoreMessage(score, total);
 
   // カウントアップアニメーション
+  // 約1.5秒かけて0からscoreまで滑らかにカウントアップする
+  // 16msごとにincrementを加算（約60fps相当）
   useEffect(() => {
     let start = 0;
-    const duration = 1500;
-    const increment = score / (duration / 16);
+    const duration = 1500; // アニメーション時間（ミリ秒）
+    const increment = score / (duration / 16); // 1フレームあたりの増加量
 
     const timer = setInterval(() => {
       start += increment;
       if (start >= score) {
-        setAnimatedScore(score);
+        setAnimatedScore(score); // 最終値に到達
         clearInterval(timer);
       } else {
         setAnimatedScore(Math.floor(start));
       }
-    }, 16);
+    }, 16); // 約60fps
 
     return () => clearInterval(timer);
   }, [score]);
 
-  // スコアに応じた色とスタイル
+  /**
+   * スコアの正解率に応じたビジュアルスタイルを決定する
+   * @returns スタイルオブジェクト
+   * @returns {string} gradient テキストグラデーションクラス
+   * @returns {string} ringColor 円形グラフの色
+   * @returns {string} emoji 表示絵文字
+   * @returns {string} bgGlow 背景グロー効果のクラス
+   *
+   * スコア区分:
+   * - 100%: 金色、トロフィー🏆
+   * - 80%以上: エメラルド、お祝い🎉
+   * - 60%以上: シアン、Good👍
+   * - 40%以上: オレンジ、頑張れ💪
+   * - 40%未満: ローズ、勉強📚
+   */
   const getScoreStyle = () => {
     if (percentage === 100) {
       return {
@@ -79,7 +118,11 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
   };
 
   const style = getScoreStyle();
+  // SVG円形グラフの計算
+  // 円周 = 2πr（r=120）
   const circumference = 2 * Math.PI * 120;
+  // strokeDashoffset = 正解率に応じて円弧の長さを調整
+  // 例: 80%なら、円周の80%分を描画
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (

@@ -1,3 +1,15 @@
+/**
+ * クイズページ
+ *
+ * 主な機能:
+ * - 通常モードと復習モードの両方に対応
+ * - URL Paramsからフィルター条件を取得
+ * - JSONLファイルからクライアントサイドで魚データを読み込み
+ * - 回答状態の管理とスコア計算
+ * - 間違えた問題の記録と復習機能
+ *
+ * @module app/quiz/page
+ */
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
@@ -6,27 +18,33 @@ import QuizCard from '@/components/QuizCard';
 import { FishData, QuizMode } from '@/lib/types';
 import { selectRandomFish, checkAnswer, loadRetryData, saveRetryData, clearRetryData } from '@/lib/quizLogic';
 
+/**
+ * クイズページのメインコンテンツコンポーネント
+ */
 function QuizPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [fishData, setFishData] = useState<FishData[]>([]);
-  const [questions, setQuestions] = useState<FishData[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [isAnswered, setIsAnswered] = useState(false);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [wrongQuestions, setWrongQuestions] = useState<FishData[]>([]);
-  const [quizMode, setQuizMode] = useState<QuizMode>('normal');
+  // 状態管理
+  const [fishData, setFishData] = useState<FishData[]>([]); // フィルタリング済みの魚データ全体
+  const [questions, setQuestions] = useState<FishData[]>([]); // 今回のクイズ出題データ（最大10問）
+  const [currentIndex, setCurrentIndex] = useState(0); // 現在の問題番号（0始まり）
+  const [userAnswer, setUserAnswer] = useState(''); // ユーザーの入力値
+  const [isAnswered, setIsAnswered] = useState(false); // 回答済みフラグ
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null); // 正誤判定結果
+  const [correctCount, setCorrectCount] = useState(0); // 累積正解数
+  const [isLoading, setIsLoading] = useState(true); // データ読み込み状態
+  const [wrongQuestions, setWrongQuestions] = useState<FishData[]>([]); // 間違えた問題のリスト
+  const [quizMode, setQuizMode] = useState<QuizMode>('normal'); // 'normal' | 'retry'
   const [filterSettings, setFilterSettings] = useState({
     categories: [] as string[],
     classifications: [] as string[],
     rarities: [] as number[]
-  });
+  }); // フィルター設定（復習時に使用）
 
   // データの読み込みとフィルタリング
+  // 1. 復習モード（mode=retry）の場合: sessionStorageからデータ取得
+  // 2. 通常モードの場合: JSONLファイル読み込み → URL Paramsでフィルタリング → ランダム選択
   useEffect(() => {
     const loadData = async () => {
       // 復習モードのチェック
@@ -44,18 +62,19 @@ function QuizPageContent() {
 
       // 通常モードの処理
       try {
-        // クライアントサイドでJSONLを読み込む
+        // クライアントサイドでJSONLを読み込む（public/fish_images.jsonl）
         const response = await fetch('/fish_images.jsonl');
         const text = await response.text();
         const lines = text.split('\n').filter(line => line.trim());
         const allFish: FishData[] = lines.map(line => JSON.parse(line));
 
         // URL Paramsから絞り込み条件を取得
+        // 例: /quiz?categories=魚類,軟体動物&rarities=4,5
         const categories = searchParams.get('categories')?.split(',').filter(c => c) || [];
         const classifications = searchParams.get('classifications')?.split(',').filter(c => c) || [];
         const rarities = searchParams.get('rarities')?.split(',').filter(r => r).map(Number) || [];
 
-        // フィルタリング
+        // フィルタリング（AND条件）
         let filtered = allFish;
         if (categories.length > 0 || classifications.length > 0 || rarities.length > 0) {
           filtered = allFish.filter(fish => {
@@ -72,10 +91,10 @@ function QuizPageContent() {
 
         setFishData(filtered);
 
-        // フィルター設定を保存
+        // フィルター設定を保存（復習時に使用）
         setFilterSettings({ categories, classifications, rarities });
 
-        // ランダムに最大10問を選択
+        // ランダムに最大10問を選択（Fisher-Yatesアルゴリズム）
         const selectedQuestions = selectRandomFish(filtered, 10);
         setQuestions(selectedQuestions);
         setIsLoading(false);
@@ -88,10 +107,19 @@ function QuizPageContent() {
     loadData();
   }, [searchParams]);
 
+  /**
+   * 入力変更ハンドラー
+   */
   const handleAnswerChange = (answer: string) => {
     setUserAnswer(answer);
   };
 
+  /**
+   * 回答送信ハンドラー
+   * 1. 正誤判定
+   * 2. 正解数カウント更新
+   * 3. 不正解の場合、復習用リストに追加
+   */
   const handleSubmit = () => {
     if (isAnswered) return;
 
@@ -102,11 +130,18 @@ function QuizPageContent() {
     if (correct) {
       setCorrectCount(prev => prev + 1);
     } else {
-      // 間違えた問題を記録
+      // 間違えた問題を記録（復習機能用）
       setWrongQuestions(prev => [...prev, questions[currentIndex]]);
     }
   };
 
+  /**
+   * 次の問題へ進む / 結果画面へ遷移するハンドラー
+   * 最終問題の場合:
+   * 1. スコア履歴保存（通常モードのみ）
+   * 2. 復習データ保存（間違えた問題がある場合）
+   * 3. 結果画面へ遷移
+   */
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
       // 次の問題へ
@@ -122,6 +157,7 @@ function QuizPageContent() {
       params.set('mode', quizMode);
 
       // 間違えた問題があればsessionStorageに保存（通常モード・復習モード共通）
+      // これにより、結果画面から「間違えた問題だけやり直す」ボタンが利用可能になる
       if (wrongQuestions.length > 0) {
         saveRetryData(wrongQuestions, filterSettings, correctCount, questions.length);
       }

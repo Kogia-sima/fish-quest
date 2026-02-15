@@ -1,3 +1,9 @@
+/**
+ * クイズロジックモジュール
+ * 問題選択、回答判定、復習データ管理などクイズの中核機能を提供する
+ * SessionStorageを使用して間違えた問題の復習機能をサポートする
+ * @module quizLogic
+ */
 import { FishData, RetryQuizData } from './types';
 
 /**
@@ -36,7 +42,7 @@ export function getScoreMessage(score: number, total: number): string {
   return 'もっと勉強が必要です';
 }
 
-// sessionStorageキー定数
+// SessionStorageのキー（復習データの保存先）
 const STORAGE_KEY = 'quiz-retry-data';
 
 /**

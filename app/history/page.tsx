@@ -1,3 +1,13 @@
+/**
+ * スコア履歴ページ
+ *
+ * 主な機能:
+ * - 過去のクイズ結果を時系列グラフで表示
+ * - 統計情報（平均正解率、最高正解率、挑戦回数）の表示
+ * - 履歴削除機能（確認ダイアログ付き）
+ *
+ * @module app/history/page
+ */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,26 +16,42 @@ import { loadScoreHistory, clearScoreHistory } from '@/lib/historyLogic';
 import { ScoreHistoryEntry } from '@/lib/types';
 import HistoryChart from '@/components/HistoryChart';
 
+/**
+ * スコア履歴を表示するメインコンポーネント
+ */
 export default function HistoryPage() {
   const router = useRouter();
-  const [entries, setEntries] = useState<ScoreHistoryEntry[]>([]);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  // 状態管理
+  const [entries, setEntries] = useState<ScoreHistoryEntry[]>([]); // 履歴エントリー
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // 削除確認ダイアログの表示状態
 
+  // LocalStorageから履歴を読み込み
   useEffect(() => {
     const history = loadScoreHistory();
     setEntries(history.entries);
   }, []);
 
+  /**
+   * 履歴削除ハンドラー
+   * LocalStorageから全履歴を削除し、UIを更新する
+   */
   const handleDelete = () => {
     clearScoreHistory();
     setEntries([]);
     setShowDeleteConfirm(false);
   };
 
+  /**
+   * 戻るボタンのハンドラー
+   * トップ画面（設定画面）に戻る
+   */
   const handleBack = () => {
     router.push('/');
   };
 
+  // 統計情報の計算
+  // - 平均正解率: 全エントリーのpercentageの平均値
+  // - 最高正解率: 全エントリーのpercentageの最大値
   const averagePercentage = entries.length > 0
     ? Math.round(entries.reduce((sum, e) => sum + e.percentage, 0) / entries.length)
     : 0;

@@ -1,30 +1,47 @@
+/**
+ * スコア履歴グラフコンポーネント
+ * Rechartsライブラリを使用して正解率の推移を折れ線グラフで表示する
+ * @module components/HistoryChart
+ */
 'use client';
 
 import { ScoreHistoryEntry } from '@/lib/types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+/**
+ * HistoryChartコンポーネントのProps
+ */
 interface HistoryChartProps {
+  /** スコア履歴エントリーの配列 */
   entries: ScoreHistoryEntry[];
 }
 
+/**
+ * スコア履歴をグラフで表示するコンポーネント
+ * @param props HistoryChartProps
+ */
 export default function HistoryChart({ entries }: HistoryChartProps) {
-  // データを古い順に並び替え（グラフ表示用）
+  // データを古い順に並び替え（グラフのX軸は左→右が時系列順）
+  // データ変換: ScoreHistoryEntry → グラフ表示用オブジェクト
   const chartData = [...entries]
     .reverse()
     .map((entry, index) => ({
-      name: `#${index + 1}`,
-      percentage: entry.percentage,
+      name: `#${index + 1}`, // グラフのX軸ラベル
+      percentage: entry.percentage, // Y軸の値（正解率）
       date: new Date(entry.timestamp).toLocaleDateString('ja-JP', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
       }),
-      score: entry.score,
-      total: entry.total
+      score: entry.score, // ツールチップ用
+      total: entry.total // ツールチップ用
     }));
 
-  // カスタムツールチップ
+  /**
+   * グラフポイントにホバー時のカスタムツールチップ
+   * 正解率、正解数/総数、日時を表示する
+   */
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (

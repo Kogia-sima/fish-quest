@@ -1,21 +1,50 @@
+/**
+ * クイズカードコンポーネント
+ *
+ * 主な機能:
+ * - 魚の画像表示
+ * - 回答入力フォーム
+ * - 正誤判定のビジュアルフィードバック（色・アニメーション）
+ * - プログレスバー
+ * - Enterキーでの回答送信
+ *
+ * @module components/QuizCard
+ */
 'use client';
 
 import Image from 'next/image';
 import { FishData, QuizMode } from '@/lib/types';
 
+/**
+ * QuizCardコンポーネントのProps
+ */
 interface QuizCardProps {
+  /** 出題する魚データ */
   fish: FishData;
+  /** 現在の問題番号（0始まり） */
   currentIndex: number;
+  /** 総問題数 */
   totalQuestions: number;
+  /** ユーザーの入力値 */
   userAnswer: string;
+  /** 回答済みフラグ */
   isAnswered: boolean;
+  /** 正誤判定結果（未回答時はnull） */
   isCorrect: boolean | null;
+  /** 入力変更のコールバック */
   onAnswerChange: (answer: string) => void;
+  /** 回答送信のコールバック */
   onSubmit: () => void;
+  /** 次の問題へ進むコールバック */
   onNext: () => void;
+  /** クイズモード */
   mode?: QuizMode;
 }
 
+/**
+ * クイズカードを表示するメインコンポーネント
+ * @param props QuizCardProps
+ */
 export default function QuizCard({
   fish,
   currentIndex,
@@ -83,6 +112,10 @@ export default function QuizCard({
             {/* Fish Image */}
             <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-950/80 to-cyan-950/80 p-6 sm:p-8">
               <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/50">
+                {/* Next.js Image最適化
+                    - priority: 最初の問題の画像のみ優先読み込み（LCP改善）
+                    - sizes: レスポンシブ対応のブレークポイント設定
+                    - object-contain: アスペクト比を維持して表示 */}
                 <Image
                   src={`/images/${fish.image_filename}`}
                   alt="魚の画像"
@@ -114,6 +147,7 @@ export default function QuizCard({
                   disabled={isAnswered}
                   placeholder="魚の名前を入力..."
                   className="w-full px-6 py-4 bg-blue-950/80 border-2 border-cyan-500/30 rounded-2xl text-cyan-50 placeholder-cyan-400/40 focus:border-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-lg disabled:bg-blue-950/60"
+                  // Enterキーで回答送信（未回答時のみ）
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !isAnswered) {
                       onSubmit();
@@ -193,6 +227,17 @@ export default function QuizCard({
       </div>
 
       <style jsx>{`
+        /* アニメーション一覧:
+           - pulse-glow: 問題番号の脈動エフェクト
+           - fade-in: フェードイン
+           - slide-up: 下からスライドアップ
+           - success-flash: 正解時の画面フラッシュ
+           - error-shake: 不正解時の画面シェイク
+           - success-pulse: 正解ボックスの拡大エフェクト
+           - bounce-in: チェックマークのバウンス登場
+           - shake: バツマークのシェイク
+           - result-appear: 結果表示のスケールイン */
+
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); }
           50% { box-shadow: 0 0 30px rgba(34, 211, 238, 0.6); }
@@ -251,7 +296,7 @@ export default function QuizCard({
         .animate-shake { animation: shake 0.5s ease-in-out; }
         .animate-result-appear { animation: result-appear 0.5s ease-out; }
 
-        /* モバイル端末ではアニメーション完全無効化 + パフォーマンス最適化 */
+        /* モバイル端末でのパフォーマンス最適化 */
         @media (max-width: 768px) {
           /* すべてのアニメーションを無効化 */
           .animate-fade-in,
