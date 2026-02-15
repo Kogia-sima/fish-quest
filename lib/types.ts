@@ -27,3 +27,26 @@ export interface QuizQuestion {
   userAnswer: string;
   isCorrect: boolean | null;
 }
+
+/**
+ * 復習クイズのデータ型定義
+ */
+export interface RetryQuizData {
+  mode: 'retry';
+  questions: FishData[];
+  originalSettings: {
+    categories: string[];
+    classifications: string[];
+    rarities: number[];
+  };
+  previousScore: {
+    score: number;
+    total: number;
+  };
+  timestamp?: number;
+}
+
+/**
+ * クイズモードの型定義
+ */
+export type QuizMode = 'normal' | 'retry';

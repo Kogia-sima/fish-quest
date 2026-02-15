@@ -1,8 +1,10 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ResultDisplay from '@/components/ResultDisplay';
+import { QuizMode } from '@/lib/types';
+import { loadRetryData } from '@/lib/quizLogic';
 
 function ResultPageContent() {
   const router = useRouter();
@@ -10,9 +12,20 @@ function ResultPageContent() {
 
   const score = parseInt(searchParams.get('score') || '0', 10);
   const total = parseInt(searchParams.get('total') || '0', 10);
+  const mode = (searchParams.get('mode') as QuizMode) || 'normal';
+  const [hasRetryData, setHasRetryData] = useState(false);
+
+  useEffect(() => {
+    const retryData = loadRetryData();
+    setHasRetryData(retryData !== null && retryData.questions.length > 0);
+  }, [mode]);
 
   const handleRetry = () => {
     router.push('/');
+  };
+
+  const handleRetryWrong = () => {
+    router.push('/quiz?mode=retry');
   };
 
   // バリデーション
@@ -36,7 +49,15 @@ function ResultPageContent() {
     );
   }
 
-  return <ResultDisplay score={score} total={total} onRetry={handleRetry} />;
+  return (
+    <ResultDisplay
+      score={score}
+      total={total}
+      onRetry={handleRetry}
+      onRetryWrong={hasRetryData ? handleRetryWrong : undefined}
+      mode={mode}
+    />
+  );
 }
 
 export default function ResultPage() {

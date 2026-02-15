@@ -2,14 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { getScoreMessage } from '@/lib/quizLogic';
+import { QuizMode } from '@/lib/types';
 
 interface ResultDisplayProps {
   score: number;
   total: number;
   onRetry: () => void;
+  onRetryWrong?: () => void;
+  mode?: QuizMode;
 }
 
-export default function ResultDisplay({ score, total, onRetry }: ResultDisplayProps) {
+export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mode = 'normal' }: ResultDisplayProps) {
+  const wrongCount = total - score;
+  const isRetryMode = mode === 'retry';
   const [animatedScore, setAnimatedScore] = useState(0);
   const percentage = Math.round((score / total) * 100);
   const message = getScoreMessage(score, total);
@@ -79,11 +84,18 @@ export default function ResultDisplay({ score, total, onRetry }: ResultDisplayPr
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-950">
-      {/* Animated background elements */}
+      {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-float-delayed" />
-        <div className={`absolute inset-0 ${style.bgGlow} animate-pulse-slow`} />
+        {/* Static background gradient with score-based glow */}
+        <div className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(circle at 25% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 75% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 50%)
+            `
+          }}
+        />
+        <div className={`absolute inset-0 ${style.bgGlow} opacity-40`} />
 
         {/* Confetti for high scores */}
         {percentage >= 80 && (
@@ -117,7 +129,7 @@ export default function ResultDisplay({ score, total, onRetry }: ResultDisplayPr
           </div>
 
           {/* Result Card */}
-          <div className="backdrop-blur-xl bg-gradient-to-br from-blue-900/40 via-cyan-900/30 to-blue-900/40 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 p-8 sm:p-10 lg:p-12 space-y-10 animate-slide-up">
+          <div className="bg-gradient-to-br from-blue-900/70 via-cyan-900/60 to-blue-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 p-8 sm:p-10 lg:p-12 space-y-10 animate-slide-up">
 
             {/* Score Circle */}
             <div className="relative w-80 h-80 mx-auto animate-scale-in">
@@ -197,13 +209,33 @@ export default function ResultDisplay({ score, total, onRetry }: ResultDisplayPr
               </div>
             </div>
 
-            {/* Retry button */}
-            <button
-              onClick={onRetry}
-              className="w-full py-5 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-xl font-bold rounded-2xl shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-5"
-            >
-              もう一度挑戦する 🐟
-            </button>
+            {/* 復習可能な問題数 */}
+            {wrongCount > 0 && (
+              <p className="text-sm text-cyan-300/60 text-center -mt-4 animate-fade-in-delayed-4">
+                {wrongCount}問の復習が可能です
+              </p>
+            )}
+
+            {/* Retry buttons */}
+            <div className="space-y-3">
+              {/* 復習ボタン（間違いありの場合に表示） */}
+              {onRetryWrong && wrongCount > 0 && (
+                <button
+                  onClick={onRetryWrong}
+                  className="w-full py-5 px-8 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-400 hover:to-rose-400 text-white text-xl font-bold rounded-2xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-5"
+                >
+                  {isRetryMode ? '間違えた問題をさらにやり直す 📝' : '間違えた問題だけやり直す 📝'} ({wrongCount}問)
+                </button>
+              )}
+
+              {/* 通常の再挑戦ボタン */}
+              <button
+                onClick={onRetry}
+                className="w-full py-5 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-xl font-bold rounded-2xl shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-5"
+              >
+                トップ画面に戻る 🐟
+              </button>
+            </div>
           </div>
 
           {/* Footer message */}
@@ -214,18 +246,6 @@ export default function ResultDisplay({ score, total, onRetry }: ResultDisplayPr
       </div>
 
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(20px); }
-        }
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
-        }
         @keyframes wave-gradient {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
@@ -264,9 +284,6 @@ export default function ResultDisplay({ score, total, onRetry }: ResultDisplayPr
           }
         }
 
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
-        .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
         .animate-wave-gradient {
           background-size: 200% 200%;
           animation: wave-gradient 4s ease infinite;
@@ -285,6 +302,52 @@ export default function ResultDisplay({ score, total, onRetry }: ResultDisplayPr
 
         .transition-all.duration-2000 {
           transition-duration: 2000ms;
+        }
+
+        /* モバイル端末ではアニメーション完全無効化 + パフォーマンス最適化 */
+        @media (max-width: 768px) {
+          /* すべてのアニメーションを無効化 */
+          .animate-fade-in,
+          .animate-fade-in-delayed-2,
+          .animate-fade-in-delayed-3,
+          .animate-fade-in-delayed-4,
+          .animate-fade-in-delayed-5,
+          .animate-fade-in-delayed-6,
+          .animate-slide-up,
+          .animate-scale-in,
+          .animate-bounce-in,
+          .animate-count-up,
+          .animate-wave-gradient {
+            animation: none !important;
+          }
+          .animate-confetti {
+            display: none !important;
+          }
+
+          /* shadowを軽量化 */
+          .shadow-2xl {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+          }
+
+          /* transition-allを無効化 */
+          .transition-all {
+            transition: none !important;
+          }
+          .transition-all.duration-2000 {
+            transition: none !important;
+          }
+        }
+
+        /* ユーザーがアニメーション削減を希望する場合は無効化 */
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-delay: 0s !important;
+            animation-iteration-count: 1 !important;
+          }
+          .transition-all {
+            transition-duration: 0.01ms !important;
+          }
         }
       `}</style>
     </div>

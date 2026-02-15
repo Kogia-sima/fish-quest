@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import QuizCard from '@/components/QuizCard';
-import { FishData } from '@/lib/types';
-import { selectRandomFish, checkAnswer } from '@/lib/quizLogic';
+import { FishData, QuizMode } from '@/lib/types';
+import { selectRandomFish, checkAnswer, loadRetryData, saveRetryData, clearRetryData } from '@/lib/quizLogic';
 
 function QuizPageContent() {
   const router = useRouter();
@@ -18,10 +18,31 @@ function QuizPageContent() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [wrongQuestions, setWrongQuestions] = useState<FishData[]>([]);
+  const [quizMode, setQuizMode] = useState<QuizMode>('normal');
+  const [filterSettings, setFilterSettings] = useState({
+    categories: [] as string[],
+    classifications: [] as string[],
+    rarities: [] as number[]
+  });
 
   // データの読み込みとフィルタリング
   useEffect(() => {
     const loadData = async () => {
+      // 復習モードのチェック
+      const mode = searchParams.get('mode');
+      if (mode === 'retry') {
+        const retryData = loadRetryData();
+        if (retryData) {
+          setQuizMode('retry');
+          setQuestions(retryData.questions);
+          setFilterSettings(retryData.originalSettings);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // 通常モードの処理
       try {
         // クライアントサイドでJSONLを読み込む
         const response = await fetch('/fish_images.jsonl');
@@ -51,6 +72,9 @@ function QuizPageContent() {
 
         setFishData(filtered);
 
+        // フィルター設定を保存
+        setFilterSettings({ categories, classifications, rarities });
+
         // ランダムに最大10問を選択
         const selectedQuestions = selectRandomFish(filtered, 10);
         setQuestions(selectedQuestions);
@@ -77,6 +101,9 @@ function QuizPageContent() {
 
     if (correct) {
       setCorrectCount(prev => prev + 1);
+    } else {
+      // 間違えた問題を記録
+      setWrongQuestions(prev => [...prev, questions[currentIndex]]);
     }
   };
 
@@ -88,10 +115,21 @@ function QuizPageContent() {
       setIsAnswered(false);
       setIsCorrect(null);
     } else {
-      // 結果画面へ遷移
+      // 最終問題: 結果画面へ遷移
       const params = new URLSearchParams();
       params.set('score', correctCount.toString());
       params.set('total', questions.length.toString());
+      params.set('mode', quizMode);
+
+      // 間違えた問題があればsessionStorageに保存（通常モード・復習モード共通）
+      if (wrongQuestions.length > 0) {
+        saveRetryData(wrongQuestions, filterSettings, correctCount, questions.length);
+      }
+      // 間違いがなければデータをクリア（全問正解の場合）
+      else {
+        clearRetryData();
+      }
+
       router.push(`/result?${params.toString()}`);
     }
   };
@@ -142,6 +180,7 @@ function QuizPageContent() {
       onAnswerChange={handleAnswerChange}
       onSubmit={handleSubmit}
       onNext={handleNext}
+      mode={quizMode}
     />
   );
 }

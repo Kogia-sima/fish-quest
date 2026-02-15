@@ -1,4 +1,4 @@
-import { FishData } from './types';
+import { FishData, RetryQuizData } from './types';
 
 /**
  * Fisher-Yatesアルゴリズムで配列をランダムに最大N個選択
@@ -34,4 +34,72 @@ export function getScoreMessage(score: number, total: number): string {
   if (percentage >= 60) return 'よくできました！';
   if (percentage >= 40) return 'もう少し頑張りましょう';
   return 'もっと勉強が必要です';
+}
+
+// sessionStorageキー定数
+const STORAGE_KEY = 'quiz-retry-data';
+
+/**
+ * 間違えた問題をsessionStorageに保存
+ * @param wrongQuestions 間違えた問題の配列
+ * @param settings フィルター設定
+ * @param score 正解数
+ * @param total 総問題数
+ */
+export function saveRetryData(
+  wrongQuestions: FishData[],
+  settings: { categories: string[]; classifications: string[]; rarities: number[] },
+  score: number,
+  total: number
+): void {
+  const retryData: RetryQuizData = {
+    mode: 'retry',
+    questions: wrongQuestions,
+    originalSettings: settings,
+    previousScore: { score, total },
+    timestamp: Date.now()
+  };
+
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(retryData));
+  } catch (error) {
+    console.error('Failed to save retry data:', error);
+  }
+}
+
+/**
+ * sessionStorageから復習データを読み込み
+ * @returns 復習データ、または存在しない場合はnull
+ */
+export function loadRetryData(): RetryQuizData | null {
+  try {
+    const data = sessionStorage.getItem(STORAGE_KEY);
+    if (!data) return null;
+
+    const parsed = JSON.parse(data);
+
+    // データ検証
+    if (!parsed.mode || !Array.isArray(parsed.questions)) {
+      console.error('Invalid retry data structure');
+      sessionStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+
+    return parsed as RetryQuizData;
+  } catch (error) {
+    console.error('Failed to load retry data:', error);
+    sessionStorage.removeItem(STORAGE_KEY); // 破損データを削除
+    return null;
+  }
+}
+
+/**
+ * sessionStorageから復習データを削除
+ */
+export function clearRetryData(): void {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.error('Failed to clear retry data:', error);
+  }
 }

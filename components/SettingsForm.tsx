@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { FishData } from '@/lib/types';
 import { getClassificationsByCategories, filterFishData } from '@/lib/fishUtils';
+import { clearRetryData } from '@/lib/quizLogic';
 
 interface SettingsFormProps {
   allCategories: string[];
@@ -83,8 +84,8 @@ function DropdownPortal({ isOpen, buttonRef, children, dataDropdown }: DropdownP
         const rect = buttonRef.current?.getBoundingClientRect();
         if (rect) {
           setPosition({
-            top: rect.bottom + window.scrollY + 8,
-            left: rect.left + window.scrollX,
+            top: rect.bottom + 8,
+            left: rect.left,
             width: rect.width,
           });
         }
@@ -134,7 +135,7 @@ function SelectedChips<T>({ items, onRemove, renderLabel, colorClass }: Selected
       {items.map((item, index) => (
         <span
           key={index}
-          className={`inline-flex items-center px-4 py-2 ${colorClass} rounded-full text-sm text-cyan-100 backdrop-blur-sm transition-all duration-300`}
+          className={`inline-flex items-center px-4 py-2 ${colorClass} rounded-full text-sm text-cyan-100 transition-all duration-300`}
         >
           {renderLabel(item)}
           <button
@@ -197,7 +198,7 @@ function FilterDropdown<T>({
           ref={buttonRef}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
-          className="w-full px-5 py-4 bg-blue-950/60 border-2 border-cyan-500/30 rounded-2xl text-left text-cyan-50 hover:border-cyan-400/50 focus:border-cyan-400 focus:outline-none transition-all duration-300 backdrop-blur-sm hover:bg-blue-950/80 flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-cyan-500/30"
+          className="w-full px-5 py-4 bg-blue-950/80 border-2 border-cyan-500/30 rounded-2xl text-left text-cyan-50 hover:border-cyan-400/50 focus:border-cyan-400 focus:outline-none transition-all duration-300 hover:bg-blue-950/90 flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-cyan-500/30"
         >
           <span className="flex-1">{buttonText}</span>
           <svg
@@ -277,6 +278,9 @@ export default function SettingsForm({
   const handleStartQuiz = () => {
     if (filteredCount === 0) return;
 
+    // 古い復習データをクリア
+    clearRetryData();
+
     const params = new URLSearchParams();
     if (selectedCategories.length > 0) {
       params.set('categories', selectedCategories.join(','));
@@ -296,12 +300,16 @@ export default function SettingsForm({
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-950 dark:from-black dark:via-blue-950 dark:to-slate-950">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-float-delayed" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-500/5 rounded-full blur-3xl animate-pulse-slow" />
-      </div>
+      {/* Static background gradient */}
+      <div className="absolute inset-0 pointer-events-none -z-10"
+        style={{
+          background: `
+            radial-gradient(circle at 25% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 75% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.04) 0%, transparent 50%)
+          `
+        }}
+      />
 
       {/* Main content */}
       <div className="relative flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
@@ -317,7 +325,7 @@ export default function SettingsForm({
           </div>
 
           {/* Settings Card */}
-          <div className="backdrop-blur-xl bg-gradient-to-br from-blue-900/40 via-cyan-900/30 to-blue-900/40 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 lg:p-10 space-y-8 animate-slide-up">
+          <div className="bg-gradient-to-br from-blue-900/70 via-cyan-900/60 to-blue-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 lg:p-10 space-y-8 animate-slide-up">
 
             {/* Category Selector */}
             <FilterDropdown
@@ -389,18 +397,6 @@ export default function SettingsForm({
       </div>
 
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(20px); }
-        }
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.1); }
-        }
         @keyframes wave-gradient {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
@@ -418,9 +414,6 @@ export default function SettingsForm({
           to { opacity: 1; transform: translateY(0) scaleY(1); }
         }
 
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
-        .animate-pulse-slow { animation: pulse-slow 10s ease-in-out infinite; }
         .animate-wave-gradient {
           background-size: 200% 200%;
           animation: wave-gradient 4s ease infinite;
@@ -436,6 +429,42 @@ export default function SettingsForm({
         .animate-dropdown-open {
           animation: dropdown-open 0.3s ease-out;
           transform-origin: top center;
+        }
+
+        /* モバイル端末ではアニメーション完全無効化 + パフォーマンス最適化 */
+        @media (max-width: 768px) {
+          /* すべてのアニメーションを無効化 */
+          .animate-fade-in,
+          .animate-fade-in-delayed-1,
+          .animate-fade-in-delayed-2,
+          .animate-fade-in-delayed-3,
+          .animate-fade-in-delayed-4,
+          .animate-fade-in-delayed-5,
+          .animate-fade-in-delayed-6,
+          .animate-slide-up,
+          .animate-dropdown-open,
+          .animate-wave-gradient {
+            animation: none !important;
+          }
+
+          /* shadowを軽量化 */
+          .shadow-2xl {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+          }
+
+          /* transition-allを無効化 */
+          .transition-all {
+            transition: none !important;
+          }
+        }
+
+        /* ユーザーがアニメーション削減を希望する場合は無効化 */
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-delay: 0s !important;
+            animation-iteration-count: 1 !important;
+          }
         }
       `}</style>
     </div>

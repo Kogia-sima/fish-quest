@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { FishData } from '@/lib/types';
+import { FishData, QuizMode } from '@/lib/types';
 
 interface QuizCardProps {
   fish: FishData;
@@ -13,6 +13,7 @@ interface QuizCardProps {
   onAnswerChange: (answer: string) => void;
   onSubmit: () => void;
   onNext: () => void;
+  mode?: QuizMode;
 }
 
 export default function QuizCard({
@@ -25,22 +26,28 @@ export default function QuizCard({
   onAnswerChange,
   onSubmit,
   onNext,
+  mode = 'normal',
 }: QuizCardProps) {
   const isLastQuestion = currentIndex === totalQuestions - 1;
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-950">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-float-delayed" />
-        {isAnswered && isCorrect && (
-          <div className="absolute inset-0 bg-emerald-500/5 animate-success-flash" />
-        )}
-        {isAnswered && !isCorrect && (
-          <div className="absolute inset-0 animate-error-shake" />
-        )}
-      </div>
+      {/* Static background gradient */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(circle at 25% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 75% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 50%)
+          `
+        }}
+      />
+      {/* Answer feedback overlays */}
+      {isAnswered && isCorrect && (
+        <div className="absolute inset-0 bg-emerald-500/5 animate-success-flash pointer-events-none" />
+      )}
+      {isAnswered && !isCorrect && (
+        <div className="absolute inset-0 animate-error-shake pointer-events-none" />
+      )}
 
       {/* Main content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
@@ -49,7 +56,11 @@ export default function QuizCard({
           {/* Progress indicator */}
           <div className="flex items-center justify-between mb-8 animate-fade-in">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30 animate-pulse-glow">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg animate-pulse-glow ${
+                mode === 'retry'
+                  ? 'bg-gradient-to-br from-orange-400 to-rose-500 shadow-orange-500/50'
+                  : 'bg-gradient-to-br from-cyan-400 to-blue-500 shadow-cyan-500/30'
+              }`}>
                 <span className="text-white font-bold">{currentIndex + 1}</span>
               </div>
               <span className="text-cyan-100 text-lg font-medium">
@@ -58,7 +69,7 @@ export default function QuizCard({
             </div>
 
             {/* Progress bar */}
-            <div className="flex-1 mx-6 h-2 bg-blue-950/60 rounded-full overflow-hidden backdrop-blur-sm border border-cyan-500/20">
+            <div className="flex-1 mx-6 h-2 bg-blue-950/80 rounded-full overflow-hidden border border-cyan-500/20">
               <div
                 className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500 ease-out shadow-lg shadow-cyan-500/50"
                 style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
@@ -67,11 +78,11 @@ export default function QuizCard({
           </div>
 
           {/* Quiz Card */}
-          <div className="backdrop-blur-xl bg-gradient-to-br from-blue-900/40 via-cyan-900/30 to-blue-900/40 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 overflow-hidden animate-slide-up">
+          <div className="bg-gradient-to-br from-blue-900/70 via-cyan-900/60 to-blue-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 overflow-hidden animate-slide-up">
 
             {/* Fish Image */}
             <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-950/80 to-cyan-950/80 p-6 sm:p-8">
-              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/50 animate-image-float">
+              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/50">
                 <Image
                   src={`/images/${fish.image_filename}`}
                   alt="魚の画像"
@@ -81,11 +92,6 @@ export default function QuizCard({
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1000px"
                 />
               </div>
-
-              {/* Bubbles decoration */}
-              <div className="absolute top-8 right-8 w-4 h-4 bg-cyan-300/30 rounded-full animate-bubble-1" />
-              <div className="absolute top-16 right-12 w-3 h-3 bg-cyan-300/20 rounded-full animate-bubble-2" />
-              <div className="absolute bottom-12 left-10 w-5 h-5 bg-blue-300/20 rounded-full animate-bubble-3" />
             </div>
 
             {/* Question Section */}
@@ -107,7 +113,7 @@ export default function QuizCard({
                   onChange={(e) => onAnswerChange(e.target.value)}
                   disabled={isAnswered}
                   placeholder="魚の名前を入力..."
-                  className="w-full px-6 py-4 bg-blue-950/60 border-2 border-cyan-500/30 rounded-2xl text-cyan-50 placeholder-cyan-400/40 focus:border-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-400/20 transition-all duration-300 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed text-lg disabled:bg-blue-950/40"
+                  className="w-full px-6 py-4 bg-blue-950/80 border-2 border-cyan-500/30 rounded-2xl text-cyan-50 placeholder-cyan-400/40 focus:border-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-lg disabled:bg-blue-950/60"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !isAnswered) {
                       onSubmit();
@@ -187,14 +193,6 @@ export default function QuizCard({
       </div>
 
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(20px); }
-        }
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); }
           50% { box-shadow: 0 0 30px rgba(34, 211, 238, 0.6); }
@@ -210,22 +208,6 @@ export default function QuizCard({
         @keyframes slide-up {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes image-float {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-5px) scale(1.01); }
-        }
-        @keyframes bubble-1 {
-          0% { transform: translateY(0px); opacity: 0.3; }
-          100% { transform: translateY(-100px); opacity: 0; }
-        }
-        @keyframes bubble-2 {
-          0% { transform: translateY(0px); opacity: 0.2; }
-          100% { transform: translateY(-120px); opacity: 0; }
-        }
-        @keyframes bubble-3 {
-          0% { transform: translateY(0px); opacity: 0.25; }
-          100% { transform: translateY(-80px); opacity: 0; }
         }
         @keyframes success-flash {
           0%, 100% { opacity: 0; }
@@ -255,8 +237,6 @@ export default function QuizCard({
           to { opacity: 1; transform: scale(1); }
         }
 
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
         .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
         .animate-fade-in { animation: fade-in 0.6s ease-out; }
         .animate-fade-in-delayed { animation: fade-in-delayed 0.8s ease-out 0.2s both; }
@@ -264,16 +244,54 @@ export default function QuizCard({
         .animate-fade-in-delayed-3 { animation: fade-in 0.6s ease-out 0.3s both; }
         .animate-fade-in-delayed-5 { animation: fade-in 0.6s ease-out 0.5s both; }
         .animate-slide-up { animation: slide-up 0.8s ease-out; }
-        .animate-image-float { animation: image-float 4s ease-in-out infinite; }
-        .animate-bubble-1 { animation: bubble-1 4s ease-in infinite; }
-        .animate-bubble-2 { animation: bubble-2 5s ease-in 1s infinite; }
-        .animate-bubble-3 { animation: bubble-3 6s ease-in 0.5s infinite; }
         .animate-success-flash { animation: success-flash 1s ease-out; }
         .animate-success-pulse { animation: success-pulse 0.5s ease-out; }
         .animate-error-shake { animation: error-shake 0.5s ease-out; }
         .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         .animate-shake { animation: shake 0.5s ease-in-out; }
         .animate-result-appear { animation: result-appear 0.5s ease-out; }
+
+        /* モバイル端末ではアニメーション完全無効化 + パフォーマンス最適化 */
+        @media (max-width: 768px) {
+          /* すべてのアニメーションを無効化 */
+          .animate-fade-in,
+          .animate-fade-in-delayed,
+          .animate-fade-in-delayed-2,
+          .animate-fade-in-delayed-3,
+          .animate-fade-in-delayed-5,
+          .animate-slide-up,
+          .animate-pulse-glow,
+          .animate-success-flash,
+          .animate-success-pulse,
+          .animate-error-shake,
+          .animate-bounce-in,
+          .animate-shake,
+          .animate-result-appear {
+            animation: none !important;
+          }
+
+          /* shadowを軽量化 */
+          .shadow-2xl {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+          }
+          .shadow-lg {
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+          }
+
+          /* transition-allを無効化 */
+          .transition-all {
+            transition: none !important;
+          }
+        }
+
+        /* ユーザーがアニメーション削減を希望する場合は無効化 */
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-delay: 0s !important;
+            animation-iteration-count: 1 !important;
+          }
+        }
       `}</style>
     </div>
   );
