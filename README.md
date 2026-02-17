@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🐟 魚の名前当てクイズ
 
-## Getting Started
+905種類の魚データと画像を活用した教育的なクイズWebアプリケーションです。魚の画像を見て名前を当てることで、楽しみながら魚の知識を身につけることができます。
 
-First, run the development server:
+### 主な機能
+
+- **絞り込み機能**: カテゴリー（27種類）と分類で魚を絞り込み
+- **クイズモード**: 最大10問のランダム出題
+- **即時フィードバック**: 回答後すぐに正解・不正解を表示
+- **復習機能**: 間違えた問題だけをやり直せる機能
+- **スコア履歴**: 過去の正解率をグラフで可視化
+- **統計情報**: 平均正解率、最高正解率、挑戦回数を表示
+- **レスポンシブデザイン**: モバイル、タブレット、デスクトップに対応
+
+### 技術スタック
+
+- **フレームワーク**: Next.js 16 (App Router)
+- **言語**: TypeScript 5
+- **UI**: React 19
+- **スタイリング**: Tailwind CSS 4
+- **グラフ**: Recharts 3.7
+- **パッケージマネージャー**: pnpm
+
+## 🚀 クイックスタート
+
+### 必要要件
+
+- Node.js 20以上
+- pnpm
+
+### インストール
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# リポジトリのクローン
+git clone https://github.com/machida-analytics/fish-name-quiz.git
+cd fish-name-quiz
+
+# 依存関係のインストール
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 開発サーバーの起動
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いてアプリケーションを確認できます。
 
-## Learn More
+### ビルド
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# プロダクションビルド
+pnpm build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# プロダクションサーバーの起動
+pnpm start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### デプロイ
 
-## Deploy on Vercel
+```bash
+# Firebase Hostingへのデプロイ
+pnpm deploy
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📁 フォルダ構成
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+fish-name-quiz/
+├── app/                      # Next.js App Router
+│   ├── page.tsx             # 設定画面（トップページ）
+│   ├── layout.tsx           # ルートレイアウト
+│   ├── globals.css          # グローバルスタイル
+│   ├── quiz/
+│   │   └── page.tsx         # クイズ画面
+│   ├── result/
+│   │   └── page.tsx         # スコア表示画面
+│   └── history/
+│       └── page.tsx         # スコア履歴画面
+│
+├── components/               # Reactコンポーネント
+│   ├── SettingsForm.tsx     # 設定画面のフォームUI
+│   ├── QuizCard.tsx         # クイズ問題表示カード
+│   ├── ResultDisplay.tsx    # 結果表示コンポーネント
+│   └── HistoryChart.tsx     # スコア履歴グラフ
+│
+├── lib/                      # ビジネスロジックとユーティリティ
+│   ├── types.ts             # TypeScript型定義
+│   ├── fishData.ts          # 魚データの読み込み・フィルタリング
+│   ├── quizLogic.ts         # クイズロジック（ランダム選定、判定、復習データ管理）
+│   └── historyLogic.ts      # スコア履歴管理（localStorage操作）
+│
+├── public/                   # 静的ファイル
+│   ├── fish_images.jsonl    # 魚データ（905種類）
+│   └── images/              # 魚の画像ファイル
+│
+├── package.json             # プロジェクト設定と依存関係
+├── tsconfig.json            # TypeScript設定
+├── tailwind.config.ts       # Tailwind CSS設定
+├── next.config.ts           # Next.js設定
+└── CLAUDE.md                # プロジェクト固有の開発ルール
+```
+
+## 🎮 使い方
+
+### 1. 設定画面（トップページ）
+
+- **カテゴリー選択**: ドロップダウンから1つ以上のカテゴリーを選択（例: サメ・エイの仲間）
+- **分類選択**: 選択したカテゴリーに応じた分類を選択（例: カスザメ科）
+- **対象の魚**: リアルタイムで絞り込み結果の件数が表示される
+- **クイズを始める**: 絞り込み結果から最大10問がランダムに出題される
+- **スコア履歴を見る**: 過去のクイズ結果を確認できる
+
+### 2. クイズ画面
+
+- **魚の画像**: 問題の魚の画像が表示される
+- **入力欄**: 魚の名前を入力する（未入力でも回答可能）
+- **回答**: 入力した名前で判定を行う
+- **判定結果**: 正解なら「✓ 正解!」、不正解なら「✗ 不正解」と正解名が表示される
+- **次へ**: 次の問題に進む（最終問題では「結果を見る」）
+
+### 3. スコア表示画面
+
+- **スコア**: 正解数/総問題数と正解率を表示
+- **メッセージ**: 正解率に応じた励ましメッセージ
+  - 100%: 「完璧です！」
+  - 80%以上: 「素晴らしい！」
+  - 60%以上: 「よくできました！」
+  - 40%以上: 「もう少し頑張りましょう」
+  - 40%未満: 「もっと勉強が必要です」
+- **間違えた問題だけやり直す**: 間違えた問題のみを復習できる
+- **もう一度挑戦する**: 設定画面に戻る
+
+### 4. スコア履歴画面
+
+- **グラフ**: 過去の正解率の推移を折れ線グラフで表示
+- **統計情報**: 挑戦回数、平均正解率、最高正解率を表示
+- **履歴を削除する**: 確認ダイアログ後、全履歴を削除
+- **トップ画面に戻る**: 設定画面に戻る
+
+## 💾 データ管理
+
+### localStorage（永続的）
+
+- **キー**: `fish-quiz-score-history`
+- **用途**: スコア履歴の保存（最大50件）
+- **データ**: 正解率、スコア、タイムスタンプなど
+- **削除タイミング**: ユーザーが手動で削除、またはブラウザデータクリア時
+
+### sessionStorage（一時的）
+
+- **キー**: `quiz-retry-data`
+- **用途**: 復習モード用の間違えた問題データ
+- **削除タイミング**: タブを閉じた時、または復習完了時
+
+## 🛠️ 開発
+
+### コマンド
+
+```bash
+# 開発サーバー起動
+pnpm dev
+
+# ビルド
+pnpm build
+
+# プロダクションサーバー起動
+pnpm start
+
+# リント
+pnpm lint
+```
+
+### 開発ルール
+
+- パッケージマネージャーは `pnpm` を使用すること
+- `npm` や `yarn` は使用しないこと
+
+詳細は [CLAUDE.md](./CLAUDE.md) を参照してください。
+
+## 🎨 デザイン
+
+- **カラースキーム**: シアン/ブルー系（海のイメージ）
+  - 正解: グリーン
+  - 不正解: レッド
+  - 復習ボタン: オレンジ/ローズ
+  - 削除ボタン: ローズ/ピンク
+- **レイアウト**: カード型デザイン、中央配置
+- **レスポンシブ**: モバイルファースト
+- **アニメーション**: Tailwind CSSのトランジション
+
+## 📊 データ
+
+- **魚の種類**: 905種類
+- **カテゴリー**: 27種類（例: サメ・エイの仲間、ウツボ・アナゴの仲間）
+- **分類**: カテゴリーごとに複数の分類（例: カスザメ科、ウツボ科）
+- **画像**: 各魚に対応する画像ファイル（`public/images/`）
+- **データ形式**: JSONL（1行1JSON形式）
+
+## 🔧 トラブルシューティング
+
+### スコアが重複して記録される
+
+- **原因**: React 18のStrictModeは開発モードでuseEffectを2回実行します
+- **対策**: `useRef` を使用して重複実行を防止（実装済み）
+
+### 開発サーバーが起動しない
+
+```bash
+# ポート3000が使用中の場合
+pnpm dev -- -p 3001
+```
+
+### 画像が表示されない
+
+- `public/images/` ディレクトリに画像ファイルが存在するか確認
+- `public/fish_images.jsonl` の `filename` フィールドが正しいか確認
+
+## 📝 ライセンス
+
+MIT
+
+## 👤 作成者
+
+Ryohei Machida
