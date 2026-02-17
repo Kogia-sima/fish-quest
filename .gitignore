@@ -40,6 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/
+
 ##### Custom Settings #####
 # image files
 *.jpg
