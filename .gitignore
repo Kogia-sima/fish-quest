@@ -50,3 +50,6 @@ fish_images*.jsonl
 
 # cache files
 *.cache
+
+# claude code files
+.claude/settings.local.json
