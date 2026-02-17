@@ -1,7 +1,19 @@
 {
   "name": "fish-name-quiz",
   "version": "0.1.0",
-  "private": true,
+  "description": "魚の画像から魚の名前を当てるクイズアプリケーション。スコア履歴とチャート機能付き。",
+  "author": "Ryohei Machida <orcinus4627@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "quiz",
+    "fish",
+    "japanese",
+    "nextjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kogia-sima/fish-name-quiz.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

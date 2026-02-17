@@ -1,0 +1,28 @@
+# Development files
+.claude/
+.git/
+.firebase/
+.next/
+node_modules/
+
+# Configuration files
+.firebaserc
+firebase.json
+CLAUDE.md
+tsconfig.tsbuildinfo
+
+# Build output
+out/
+
+# Development and testing
+*.log
+.DS_Store
+
+# Documentation (keep README)
+# README.md is included by default
+
+# Scripts that are not needed in package
+scripts/
+
+# Workspace configuration
+pnpm-workspace.yaml
