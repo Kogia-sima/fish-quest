@@ -8,7 +8,7 @@ test.describe("Quiz Happy Path", () => {
   test("should navigate from home to quiz", async ({ page }) => {
     // 1. ホーム画面表示
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("魚の名前当てクイズ");
+    await expect(page.locator("h1")).toContainText("Fish Quest");
 
     // 2. クイズスタートボタンをクリック
     await page.getByRole("button", { name: /クイズを始める/i }).click();

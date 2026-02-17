@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 
 // アプリケーションのメタデータ
 export const metadata: Metadata = {
-  title: "魚の名前当てクイズ",
+  title: "Fish Quest",
   description: "905種類の魚から名前を当てるクイズアプリケーション",
 };
 

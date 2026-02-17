@@ -90,8 +90,8 @@
 
 ```bash
 # 1. リポジトリのクローン
-git clone https://github.com/Kogia-sima/fish-name-quiz.git
-cd fish-name-quiz
+git clone https://github.com/Kogia-sima/fish-quest.git
+cd fish-quest
 
 # 2. 依存関係のインストール
 pnpm install
@@ -123,7 +123,7 @@ pnpm test:coverage     # カバレッジレポート生成
 ## 📁 フォルダ構成
 
 ```
-fish-name-quiz/
+fish-quest/
 ├── app/                      # Next.js App Router
 │   ├── page.tsx             # 設定画面（トップページ）
 │   ├── layout.tsx           # ルートレイアウト

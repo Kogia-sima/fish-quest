@@ -478,7 +478,7 @@ export default function SettingsForm({
           {/* Title with ocean wave effect */}
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-300 via-blue-400 to-cyan-300 bg-clip-text text-transparent animate-wave-gradient">
-              🐠 魚の名前当てクイズ
+              🐠 Fish Quest
             </h1>
             <p className="text-cyan-200/80 text-lg sm:text-xl font-light">
               伊豆半島編
