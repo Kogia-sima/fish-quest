@@ -4,10 +4,10 @@
  * 最大50件までの履歴を保持し、統計情報の計算機能を提供する
  * @module historyLogic
  */
-import { ScoreHistory, ScoreHistoryEntry, QuizMode } from './types';
+import type { QuizMode, ScoreHistory, ScoreHistoryEntry } from "./types";
 
 // LocalStorageのキー
-const STORAGE_KEY = 'fish-quiz-score-history';
+const STORAGE_KEY = "fish-quiz-score-history";
 // 保持する履歴の最大件数（これを超えると古いものから削除される）
 const MAX_ENTRIES = 50;
 // データ構造のバージョン（将来の互換性のため）
@@ -28,7 +28,11 @@ function generateId(): string {
  * @param total 総問題数
  * @param mode クイズモード
  */
-export function saveScoreHistory(score: number, total: number, mode: QuizMode): void {
+export function saveScoreHistory(
+  score: number,
+  total: number,
+  mode: QuizMode,
+): void {
   try {
     const history = loadScoreHistory();
     const percentage = Math.round((score / total) * 100);
@@ -39,7 +43,7 @@ export function saveScoreHistory(score: number, total: number, mode: QuizMode): 
       score,
       total,
       percentage,
-      mode
+      mode,
     };
 
     // 新しいエントリを先頭に追加
@@ -52,7 +56,7 @@ export function saveScoreHistory(score: number, total: number, mode: QuizMode): 
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   } catch (error) {
-    console.error('Failed to save score history:', error);
+    console.error("Failed to save score history:", error);
   }
 }
 
@@ -71,13 +75,13 @@ export function loadScoreHistory(): ScoreHistory {
 
     // データ検証
     if (!parsed.version || !Array.isArray(parsed.entries)) {
-      console.warn('Invalid history data structure, resetting');
+      console.warn("Invalid history data structure, resetting");
       return { version: CURRENT_VERSION, entries: [] };
     }
 
     return parsed;
   } catch (error) {
-    console.error('Failed to load score history:', error);
+    console.error("Failed to load score history:", error);
     return { version: CURRENT_VERSION, entries: [] };
   }
 }
@@ -89,7 +93,7 @@ export function clearScoreHistory(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {
-    console.error('Failed to clear score history:', error);
+    console.error("Failed to clear score history:", error);
   }
 }
 
@@ -104,22 +108,24 @@ export function getHistoryStats(entries: ScoreHistoryEntry[]) {
       count: 0,
       averagePercentage: 0,
       bestScore: 0,
-      recentTrend: 0
+      recentTrend: 0,
     };
   }
 
   const count = entries.length;
   const averagePercentage = Math.round(
-    entries.reduce((sum, e) => sum + e.percentage, 0) / count
+    entries.reduce((sum, e) => sum + e.percentage, 0) / count,
   );
-  const bestScore = Math.max(...entries.map(e => e.percentage));
+  const bestScore = Math.max(...entries.map((e) => e.percentage));
 
   // 最近5件のトレンド（上昇傾向なら正、下降傾向なら負）
   // 直近5件の平均と、その前の5件（6-10番目）の平均を比較してトレンドを算出
   const recent = entries.slice(0, Math.min(5, count));
-  const recentAvg = recent.reduce((sum, e) => sum + e.percentage, 0) / recent.length;
+  const recentAvg =
+    recent.reduce((sum, e) => sum + e.percentage, 0) / recent.length;
   const older = entries.slice(5, Math.min(10, count));
-  const olderAvg = older.reduce((sum, e) => sum + e.percentage, 0) / Math.max(1, older.length);
+  const olderAvg =
+    older.reduce((sum, e) => sum + e.percentage, 0) / Math.max(1, older.length);
   // 正の値: 最近のスコアが向上、負の値: 最近のスコアが低下
   const recentTrend = recentAvg - olderAvg;
 
@@ -127,6 +133,6 @@ export function getHistoryStats(entries: ScoreHistoryEntry[]) {
     count,
     averagePercentage,
     bestScore,
-    recentTrend
+    recentTrend,
   };
 }

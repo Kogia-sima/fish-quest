@@ -4,8 +4,14 @@
  * SettingsFormコンポーネントに渡す
  * @module app/page
  */
-import { loadFishData, getAllCategories, getAllClassifications, getAllRarities } from '@/lib/fishData';
-import SettingsForm from '@/components/SettingsForm';
+
+import SettingsForm from "@/components/SettingsForm";
+import {
+  getAllCategories,
+  getAllClassifications,
+  getAllRarities,
+  loadFishData,
+} from "@/lib/fishData";
 
 /**
  * ホームページのメインコンポーネント（Server Component）

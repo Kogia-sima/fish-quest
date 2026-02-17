@@ -9,11 +9,11 @@
  *
  * @module components/ResultDisplay
  */
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { getScoreMessage } from '@/lib/quizLogic';
-import { QuizMode } from '@/lib/types';
+import { useEffect, useState } from "react";
+import { getScoreMessage } from "@/lib/quizLogic";
+import type { QuizMode } from "@/lib/types";
 
 /**
  * ResultDisplayコンポーネントのProps
@@ -35,9 +35,15 @@ interface ResultDisplayProps {
  * クイズ結果を表示するメインコンポーネント
  * @param props ResultDisplayProps
  */
-export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mode = 'normal' }: ResultDisplayProps) {
+export default function ResultDisplay({
+  score,
+  total,
+  onRetry,
+  onRetryWrong,
+  mode = "normal",
+}: ResultDisplayProps) {
   const wrongCount = total - score;
-  const isRetryMode = mode === 'retry';
+  const isRetryMode = mode === "retry";
   const [animatedScore, setAnimatedScore] = useState(0);
   const percentage = Math.round((score / total) * 100);
   const message = getScoreMessage(score, total);
@@ -81,38 +87,38 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
   const getScoreStyle = () => {
     if (percentage === 100) {
       return {
-        gradient: 'from-amber-400 via-yellow-300 to-amber-400',
-        ringColor: '#fbbf24',
-        emoji: '🏆',
-        bgGlow: 'bg-yellow-500/20',
+        gradient: "from-amber-400 via-yellow-300 to-amber-400",
+        ringColor: "#fbbf24",
+        emoji: "🏆",
+        bgGlow: "bg-yellow-500/20",
       };
     } else if (percentage >= 80) {
       return {
-        gradient: 'from-emerald-400 via-cyan-400 to-emerald-400',
-        ringColor: '#10b981',
-        emoji: '🎉',
-        bgGlow: 'bg-emerald-500/20',
+        gradient: "from-emerald-400 via-cyan-400 to-emerald-400",
+        ringColor: "#10b981",
+        emoji: "🎉",
+        bgGlow: "bg-emerald-500/20",
       };
     } else if (percentage >= 60) {
       return {
-        gradient: 'from-cyan-400 via-blue-400 to-cyan-400',
-        ringColor: '#06b6d4',
-        emoji: '👍',
-        bgGlow: 'bg-cyan-500/20',
+        gradient: "from-cyan-400 via-blue-400 to-cyan-400",
+        ringColor: "#06b6d4",
+        emoji: "👍",
+        bgGlow: "bg-cyan-500/20",
       };
     } else if (percentage >= 40) {
       return {
-        gradient: 'from-yellow-400 via-orange-400 to-yellow-400',
-        ringColor: '#f59e0b',
-        emoji: '💪',
-        bgGlow: 'bg-orange-500/20',
+        gradient: "from-yellow-400 via-orange-400 to-yellow-400",
+        ringColor: "#f59e0b",
+        emoji: "💪",
+        bgGlow: "bg-orange-500/20",
       };
     } else {
       return {
-        gradient: 'from-rose-400 via-pink-400 to-rose-400',
-        ringColor: '#f43f5e',
-        emoji: '📚',
-        bgGlow: 'bg-rose-500/20',
+        gradient: "from-rose-400 via-pink-400 to-rose-400",
+        ringColor: "#f43f5e",
+        emoji: "📚",
+        bgGlow: "bg-rose-500/20",
       };
     }
   };
@@ -130,40 +136,39 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Static background gradient with score-based glow */}
-        <div className="absolute inset-0"
+        <div
+          className="absolute inset-0"
           style={{
             background: `
               radial-gradient(circle at 25% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
               radial-gradient(circle at 75% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 50%)
-            `
+            `,
           }}
         />
         <div className={`absolute inset-0 ${style.bgGlow} opacity-40`} />
 
         {/* Confetti for high scores */}
-        {percentage >= 80 && (
-          <>
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-3 h-3 rounded-full animate-confetti"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: '-20px',
-                  backgroundColor: ['#fbbf24', '#10b981', '#06b6d4', '#f59e0b'][Math.floor(Math.random() * 4)],
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${3 + Math.random() * 2}s`,
-                }}
-              />
-            ))}
-          </>
-        )}
+        {percentage >= 80 &&
+          [...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-3 h-3 rounded-full animate-confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: "-20px",
+                backgroundColor: ["#fbbf24", "#10b981", "#06b6d4", "#f59e0b"][
+                  Math.floor(Math.random() * 4)
+                ],
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${3 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
       </div>
 
       {/* Main content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-2xl">
-
           {/* Title */}
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-4 bg-gradient-to-r from-cyan-300 via-blue-400 to-cyan-300 bg-clip-text text-transparent animate-wave-gradient">
@@ -173,11 +178,15 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
 
           {/* Result Card */}
           <div className="bg-gradient-to-br from-blue-900/70 via-cyan-900/60 to-blue-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 p-8 sm:p-10 lg:p-12 space-y-10 animate-slide-up">
-
             {/* Score Circle */}
             <div className="relative w-80 h-80 mx-auto animate-scale-in">
               {/* Background circle */}
-              <svg className="absolute inset-0 transform -rotate-90" width="100%" height="100%" viewBox="0 0 280 280">
+              <svg
+                className="absolute inset-0 transform -rotate-90"
+                width="100%"
+                height="100%"
+                viewBox="0 0 280 280"
+              >
                 <circle
                   cx="140"
                   cy="140"
@@ -200,23 +209,30 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
                   strokeLinecap="round"
                   className="transition-all duration-2000 ease-out drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]"
                   style={{
-                    animation: 'drawCircle 2s ease-out forwards',
+                    animation: "drawCircle 2s ease-out forwards",
                   }}
                 />
               </svg>
 
               {/* Center content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3">
-                <div className="text-7xl animate-bounce-in" style={{ animationDelay: '0.5s' }}>
+                <div
+                  className="text-7xl animate-bounce-in"
+                  style={{ animationDelay: "0.5s" }}
+                >
                   {style.emoji}
                 </div>
                 <div className="text-center">
                   <div className="text-6xl sm:text-7xl font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent animate-count-up">
                     {animatedScore}
                   </div>
-                  <div className="text-2xl text-cyan-200/60 font-light">/ {total}</div>
+                  <div className="text-2xl text-cyan-200/60 font-light">
+                    / {total}
+                  </div>
                 </div>
-                <div className={`text-3xl font-bold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent animate-fade-in-delayed-3`}>
+                <div
+                  className={`text-3xl font-bold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent animate-fade-in-delayed-3`}
+                >
                   {percentage}%
                 </div>
               </div>
@@ -224,26 +240,36 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
 
             {/* Message */}
             <div className="text-center space-y-4 animate-fade-in-delayed-2">
-              <h2 className={`text-4xl sm:text-5xl font-bold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent`}>
+              <h2
+                className={`text-4xl sm:text-5xl font-bold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent`}
+              >
                 {message}
               </h2>
               <p className="text-cyan-200/80 text-lg">
-                {percentage === 100 && '全問正解！完璧です！'}
-                {percentage >= 80 && percentage < 100 && 'ほとんど正解！素晴らしい成績です！'}
-                {percentage >= 60 && percentage < 80 && '良い成績です！'}
-                {percentage >= 50 && percentage < 60 && '半分以上正解できました！'}
-                {percentage < 50 && 'もう一度挑戦してみましょう！'}
+                {percentage === 100 && "全問正解！完璧です！"}
+                {percentage >= 80 &&
+                  percentage < 100 &&
+                  "ほとんど正解！素晴らしい成績です！"}
+                {percentage >= 60 && percentage < 80 && "良い成績です！"}
+                {percentage >= 50 &&
+                  percentage < 60 &&
+                  "半分以上正解できました！"}
+                {percentage < 50 && "もう一度挑戦してみましょう！"}
               </p>
             </div>
 
             {/* Score breakdown */}
             <div className="grid grid-cols-3 gap-4 animate-fade-in-delayed-4">
               <div className="bg-blue-950/40 rounded-2xl p-4 border border-cyan-500/20 text-center">
-                <div className="text-3xl font-bold text-emerald-400">{score}</div>
+                <div className="text-3xl font-bold text-emerald-400">
+                  {score}
+                </div>
                 <div className="text-sm text-cyan-200/60 mt-1">正解</div>
               </div>
               <div className="bg-blue-950/40 rounded-2xl p-4 border border-cyan-500/20 text-center">
-                <div className="text-3xl font-bold text-rose-400">{total - score}</div>
+                <div className="text-3xl font-bold text-rose-400">
+                  {total - score}
+                </div>
                 <div className="text-sm text-cyan-200/60 mt-1">不正解</div>
               </div>
               <div className="bg-blue-950/40 rounded-2xl p-4 border border-cyan-500/20 text-center">
@@ -264,15 +290,20 @@ export default function ResultDisplay({ score, total, onRetry, onRetryWrong, mod
               {/* 復習ボタン（間違いありの場合に表示） */}
               {onRetryWrong && wrongCount > 0 && (
                 <button
+                  type="button"
                   onClick={onRetryWrong}
                   className="w-full py-5 px-8 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-400 hover:to-rose-400 text-white text-xl font-bold rounded-2xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-5"
                 >
-                  {isRetryMode ? '間違えた問題をさらにやり直す 📝' : '間違えた問題だけやり直す 📝'} ({wrongCount}問)
+                  {isRetryMode
+                    ? "間違えた問題をさらにやり直す 📝"
+                    : "間違えた問題だけやり直す 📝"}{" "}
+                  ({wrongCount}問)
                 </button>
               )}
 
               {/* 通常の再挑戦ボタン */}
               <button
+                type="button"
                 onClick={onRetry}
                 className="w-full py-5 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-xl font-bold rounded-2xl shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-5"
               >

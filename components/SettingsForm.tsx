@@ -10,14 +10,17 @@
  *
  * @module components/SettingsForm
  */
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { createPortal } from 'react-dom';
-import { FishData } from '@/lib/types';
-import { getClassificationsByCategories, filterFishData } from '@/lib/fishUtils';
-import { clearRetryData } from '@/lib/quizLogic';
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import {
+  filterFishData,
+  getClassificationsByCategories,
+} from "@/lib/fishUtils";
+import { clearRetryData } from "@/lib/quizLogic";
+import type { FishData } from "@/lib/types";
 
 /**
  * SettingsFormコンポーネントのProps
@@ -44,8 +47,8 @@ interface SettingsFormProps {
  * @returns ソート済み配列（「その他」は最後尾）
  */
 function sortWithOtherLast(items: string[]): string[] {
-  const others = items.filter(item => item === 'その他');
-  const nonOthers = items.filter(item => item !== 'その他').sort();
+  const others = items.filter((item) => item === "その他");
+  const nonOthers = items.filter((item) => item !== "その他").sort();
   return [...nonOthers, ...others];
 }
 
@@ -68,10 +71,8 @@ function useToggleSelection<T>(initialValue: T[] = []) {
 
   const toggle = useCallback((item: T) => {
     // 既に選択済みなら削除、未選択なら追加
-    setSelected(prev =>
-      prev.includes(item)
-        ? prev.filter(i => i !== item)
-        : [...prev, item]
+    setSelected((prev) =>
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
     );
   }, []);
 
@@ -90,7 +91,7 @@ function useClickOutside(
   ref: React.RefObject<HTMLElement | null>,
   isOpen: boolean,
   onClose: () => void,
-  dataAttribute: string
+  dataAttribute: string,
 ) {
   useEffect(() => {
     if (!isOpen) return;
@@ -107,8 +108,8 @@ function useClickOutside(
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, ref, onClose, dataAttribute]);
 }
 
@@ -136,7 +137,12 @@ interface DropdownPortalProps {
  * Hydration mismatchを防ぐためmounted状態を使用
  * @param props DropdownPortalProps
  */
-function DropdownPortal({ isOpen, buttonRef, children, dataDropdown }: DropdownPortalProps) {
+function DropdownPortal({
+  isOpen,
+  buttonRef,
+  children,
+  dataDropdown,
+}: DropdownPortalProps) {
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
   const [mounted, setMounted] = useState(false);
 
@@ -161,12 +167,12 @@ function DropdownPortal({ isOpen, buttonRef, children, dataDropdown }: DropdownP
 
       updatePosition();
       // リサイズ・スクロール時に位置を再計算
-      window.addEventListener('resize', updatePosition);
-      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener("resize", updatePosition);
+      window.addEventListener("scroll", updatePosition, true);
 
       return () => {
-        window.removeEventListener('resize', updatePosition);
-        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener("resize", updatePosition);
+        window.removeEventListener("scroll", updatePosition, true);
       };
     }
   }, [isOpen, buttonRef]);
@@ -186,7 +192,7 @@ function DropdownPortal({ isOpen, buttonRef, children, dataDropdown }: DropdownP
     >
       {children}
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -210,7 +216,12 @@ interface SelectedChipsProps<T> {
  * @template T 選択項目の型
  * @param props SelectedChipsProps
  */
-function SelectedChips<T>({ items, onRemove, renderLabel, colorClass }: SelectedChipsProps<T>) {
+function SelectedChips<T>({
+  items,
+  onRemove,
+  renderLabel,
+  colorClass,
+}: SelectedChipsProps<T>) {
   if (items.length === 0) return null;
 
   return (
@@ -222,6 +233,7 @@ function SelectedChips<T>({ items, onRemove, renderLabel, colorClass }: Selected
         >
           {renderLabel(item)}
           <button
+            type="button"
             onClick={() => onRemove(item)}
             className="ml-2 hover:text-cyan-300 transition-colors"
           >
@@ -287,19 +299,21 @@ function FilterDropdown<T>({
   useClickOutside(buttonRef, isOpen, () => setIsOpen(false), dataDropdown);
 
   // ボタンに表示するテキストを決定
-  const buttonText = disabled && items.length === 0
-    ? emptyPlaceholder || placeholder
-    : selectedItems.length === 0
-      ? placeholder
-      : `${selectedItems.length}個を選択中`;
+  const buttonText =
+    disabled && items.length === 0
+      ? emptyPlaceholder || placeholder
+      : selectedItems.length === 0
+        ? placeholder
+        : `${selectedItems.length}個を選択中`;
 
   return (
     <div className={`space-y-3 ${delayClass}`}>
-      <label className="block text-cyan-100 text-lg font-medium mb-3">
+      <div className="block text-cyan-100 text-lg font-medium mb-3">
         {label}
-      </label>
+      </div>
       <div className="relative">
         <button
+          type="button"
           ref={buttonRef}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
@@ -308,18 +322,27 @@ function FilterDropdown<T>({
           <span className="flex-1">{buttonText}</span>
           <svg
             className={`w-5 h-5 text-cyan-400 transition-transform duration-300 ${
-              isOpen ? 'rotate-180' : ''
+              isOpen ? "rotate-180" : ""
             }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
 
         {items.length > 0 && (
-          <DropdownPortal isOpen={isOpen} buttonRef={buttonRef} dataDropdown={dataDropdown}>
+          <DropdownPortal
+            isOpen={isOpen}
+            buttonRef={buttonRef}
+            dataDropdown={dataDropdown}
+          >
             <div className="p-2">
               {items.map((item, index) => (
                 <label
@@ -364,9 +387,18 @@ export default function SettingsForm({
 }: SettingsFormProps) {
   const router = useRouter();
   // 3つのフィルター用の選択状態を管理
-  const { selected: selectedCategories, setSelected: setSelectedCategories, toggle: toggleCategory } = useToggleSelection<string>();
-  const { selected: selectedClassifications, setSelected: setSelectedClassifications, toggle: toggleClassification } = useToggleSelection<string>();
-  const { selected: selectedRarities, toggle: toggleRarity } = useToggleSelection<number>();
+  const {
+    selected: selectedCategories,
+    setSelected: setSelectedCategories,
+    toggle: toggleCategory,
+  } = useToggleSelection<string>();
+  const {
+    selected: selectedClassifications,
+    setSelected: setSelectedClassifications,
+    toggle: toggleClassification,
+  } = useToggleSelection<string>();
+  const { selected: selectedRarities, toggle: toggleRarity } =
+    useToggleSelection<number>();
 
   // 選択されたカテゴリーに基づいて利用可能な分類を動的に取得
   // 例: 「カレイの仲間」を選択した場合、「カレイ科」「ヒラメ科」などの分類のみが表示される
@@ -377,14 +409,19 @@ export default function SettingsForm({
   // カテゴリーが変更されたら、無効な分類を自動削除
   // 例: 「カレイの仲間」カテゴリーを解除したら、「カレイ科」「ヒラメ科」分類も自動削除
   useEffect(() => {
-    setSelectedClassifications(prev =>
-      prev.filter(c => availableClassifications.includes(c))
+    setSelectedClassifications((prev) =>
+      prev.filter((c) => availableClassifications.includes(c)),
     );
   }, [availableClassifications, setSelectedClassifications]);
 
   // フィルタリングされた魚の数を計算（リアルタイム更新）
   const filteredCount = useMemo(() => {
-    return filterFishData(fishData, selectedCategories, selectedClassifications, selectedRarities).length;
+    return filterFishData(
+      fishData,
+      selectedCategories,
+      selectedClassifications,
+      selectedRarities,
+    ).length;
   }, [fishData, selectedCategories, selectedClassifications, selectedRarities]);
 
   /**
@@ -400,31 +437,38 @@ export default function SettingsForm({
     // フィルター条件をURLパラメータに変換
     const params = new URLSearchParams();
     if (selectedCategories.length > 0) {
-      params.set('categories', selectedCategories.join(','));
+      params.set("categories", selectedCategories.join(","));
     }
     if (selectedClassifications.length > 0) {
-      params.set('classifications', selectedClassifications.join(','));
+      params.set("classifications", selectedClassifications.join(","));
     }
     if (selectedRarities.length > 0) {
-      params.set('rarities', selectedRarities.join(','));
+      params.set("rarities", selectedRarities.join(","));
     }
     router.push(`/quiz?${params.toString()}`);
   };
 
   // カテゴリーと分類をソート（「その他」を最後に）
-  const sortedCategories = useMemo(() => sortWithOtherLast(allCategories), [allCategories]);
-  const sortedClassifications = useMemo(() => sortWithOtherLast(availableClassifications), [availableClassifications]);
+  const sortedCategories = useMemo(
+    () => sortWithOtherLast(allCategories),
+    [allCategories],
+  );
+  const sortedClassifications = useMemo(
+    () => sortWithOtherLast(availableClassifications),
+    [availableClassifications],
+  );
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-950 dark:from-black dark:via-blue-950 dark:to-slate-950">
       {/* Static background gradient */}
-      <div className="absolute inset-0 pointer-events-none -z-10"
+      <div
+        className="absolute inset-0 pointer-events-none -z-10"
         style={{
           background: `
             radial-gradient(circle at 25% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
             radial-gradient(circle at 75% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
             radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.04) 0%, transparent 50%)
-          `
+          `,
         }}
       />
 
@@ -443,7 +487,6 @@ export default function SettingsForm({
 
           {/* Settings Card */}
           <div className="bg-gradient-to-br from-blue-900/70 via-cyan-900/60 to-blue-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 lg:p-10 space-y-8 animate-slide-up">
-
             {/* Category Selector */}
             <FilterDropdown
               label="カテゴリーで絞り込み"
@@ -498,16 +541,20 @@ export default function SettingsForm({
 
             {/* Start Button */}
             <button
+              type="button"
               onClick={handleStartQuiz}
               disabled={filteredCount === 0}
               className="w-full py-5 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-xl font-bold rounded-2xl shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 disabled:shadow-none transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 disabled:opacity-50 animate-fade-in-delayed-5"
             >
-              {filteredCount === 0 ? '魚を選択してください' : 'クイズを始める 🐟'}
+              {filteredCount === 0
+                ? "魚を選択してください"
+                : "クイズを始める 🐟"}
             </button>
 
             {/* History Button */}
             <button
-              onClick={() => router.push('/history')}
+              type="button"
+              onClick={() => router.push("/history")}
               className="w-full py-4 px-8 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white text-lg font-bold rounded-2xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-6"
             >
               スコア履歴を見る 📊

@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  getHistoryStats,
-  saveScoreHistory,
-  loadScoreHistory,
   clearScoreHistory,
-} from './historyLogic';
-import { ScoreHistoryEntry } from './types';
+  getHistoryStats,
+  loadScoreHistory,
+  saveScoreHistory,
+} from "./historyLogic";
+import type { ScoreHistoryEntry } from "./types";
 
 // テスト用のヘルパー関数: エントリーを作成
 function createEntry(
   percentage: number,
   score: number = 8,
   total: number = 10,
-  timestamp: number = Date.now()
+  timestamp: number = Date.now(),
 ): ScoreHistoryEntry {
   return {
     id: `test-${Math.random()}`,
@@ -20,12 +20,12 @@ function createEntry(
     score,
     total,
     percentage,
-    mode: 'normal',
+    mode: "normal",
   };
 }
 
-describe('getHistoryStats', () => {
-  it('空のエントリーの場合はゼロの統計を返す', () => {
+describe("getHistoryStats", () => {
+  it("空のエントリーの場合はゼロの統計を返す", () => {
     const result = getHistoryStats([]);
     expect(result).toEqual({
       count: 0,
@@ -35,7 +35,7 @@ describe('getHistoryStats', () => {
     });
   });
 
-  it('単一エントリーの統計を計算する', () => {
+  it("単一エントリーの統計を計算する", () => {
     const entries = [createEntry(80)];
     const result = getHistoryStats(entries);
     expect(result.count).toBe(1);
@@ -44,7 +44,7 @@ describe('getHistoryStats', () => {
     expect(result.recentTrend).toBe(80); // 古いデータがないため、recentAvg - 0 = 80
   });
 
-  it('複数エントリーの平均正解率を計算する', () => {
+  it("複数エントリーの平均正解率を計算する", () => {
     const entries = [
       createEntry(80),
       createEntry(60),
@@ -57,7 +57,7 @@ describe('getHistoryStats', () => {
     expect(result.averagePercentage).toBe(70);
   });
 
-  it('最高スコアを正しく検出する', () => {
+  it("最高スコアを正しく検出する", () => {
     const entries = [
       createEntry(80),
       createEntry(60),
@@ -69,7 +69,7 @@ describe('getHistoryStats', () => {
     expect(result.bestScore).toBe(100);
   });
 
-  it('最近のトレンドを計算する（10件以上）', () => {
+  it("最近のトレンドを計算する（10件以上）", () => {
     // 最近5件（0-4）の平均: (90 + 85 + 88 + 92 + 87) / 5 = 88.4
     // 古い5件（5-9）の平均: (70 + 65 + 68 + 72 + 75) / 5 = 70
     // トレンド: 88.4 - 70 = 18.4
@@ -90,7 +90,7 @@ describe('getHistoryStats', () => {
     expect(result.recentTrend).toBeCloseTo(18.4, 1);
   });
 
-  it('10件未満のエントリーでトレンドを計算する（7件）', () => {
+  it("10件未満のエントリーでトレンドを計算する（7件）", () => {
     // 最近5件（0-4）の平均: (80 + 75 + 85 + 78 + 82) / 5 = 80
     // 古い2件（5-6）の平均: (70 + 65) / 2 = 67.5
     // トレンド: 80 - 67.5 = 12.5
@@ -107,7 +107,7 @@ describe('getHistoryStats', () => {
     expect(result.recentTrend).toBeCloseTo(12.5, 1);
   });
 
-  it('5件のエントリーでトレンドを計算する', () => {
+  it("5件のエントリーでトレンドを計算する", () => {
     // 最近5件（0-4）の平均: (80 + 75 + 85 + 78 + 82) / 5 = 80
     // 古い件数なし → olderAvg = 0 / 1 = 0
     // トレンド: 80 - 0 = 80
@@ -122,7 +122,7 @@ describe('getHistoryStats', () => {
     expect(result.recentTrend).toBe(80);
   });
 
-  it('2件のエントリーでトレンドを計算する', () => {
+  it("2件のエントリーでトレンドを計算する", () => {
     // 最近2件（0-1）の平均: (80 + 70) / 2 = 75
     // 古い件数なし → olderAvg = 0 / 1 = 0
     // トレンド: 75 - 0 = 75
@@ -131,20 +131,20 @@ describe('getHistoryStats', () => {
     expect(result.recentTrend).toBe(75);
   });
 
-  it('パーセンテージを正しく丸める', () => {
+  it("パーセンテージを正しく丸める", () => {
     // 平均: (81 + 82 + 83) / 3 = 82
     const entries = [createEntry(81), createEntry(82), createEntry(83)];
     const result = getHistoryStats(entries);
     expect(result.averagePercentage).toBe(82);
   });
 
-  it('挑戦回数を正しくカウントする', () => {
+  it("挑戦回数を正しくカウントする", () => {
     const entries = Array.from({ length: 15 }, (_, i) => createEntry(80 + i));
     const result = getHistoryStats(entries);
     expect(result.count).toBe(15);
   });
 
-  it('下降トレンド（負の値）を計算する', () => {
+  it("下降トレンド（負の値）を計算する", () => {
     // 最近5件の平均: (50 + 55 + 52 + 48 + 53) / 5 = 51.6
     // 古い5件の平均: (80 + 85 + 82 + 88 + 90) / 5 = 85
     // トレンド: 51.6 - 85 = -33.4
@@ -164,7 +164,7 @@ describe('getHistoryStats', () => {
     expect(result.recentTrend).toBeCloseTo(-33.4, 1);
   });
 
-  it('すべて同じスコアの場合', () => {
+  it("すべて同じスコアの場合", () => {
     const entries = Array.from({ length: 10 }, () => createEntry(75));
     const result = getHistoryStats(entries);
     expect(result.count).toBe(10);
@@ -174,15 +174,15 @@ describe('getHistoryStats', () => {
   });
 });
 
-describe('saveScoreHistory', () => {
+describe("saveScoreHistory", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('localStorageに新しいエントリーを保存する', () => {
-    saveScoreHistory(8, 10, 'normal');
+  it("localStorageに新しいエントリーを保存する", () => {
+    saveScoreHistory(8, 10, "normal");
 
-    const saved = localStorage.getItem('fish-quiz-score-history');
+    const saved = localStorage.getItem("fish-quiz-score-history");
     expect(saved).not.toBeNull();
 
     const parsed = JSON.parse(saved!);
@@ -191,79 +191,79 @@ describe('saveScoreHistory', () => {
     expect(parsed.entries[0].score).toBe(8);
     expect(parsed.entries[0].total).toBe(10);
     expect(parsed.entries[0].percentage).toBe(80);
-    expect(parsed.entries[0].mode).toBe('normal');
+    expect(parsed.entries[0].mode).toBe("normal");
   });
 
-  it('既存エントリーの先頭に追加する', () => {
-    saveScoreHistory(5, 10, 'normal');
-    saveScoreHistory(8, 10, 'normal');
+  it("既存エントリーの先頭に追加する", () => {
+    saveScoreHistory(5, 10, "normal");
+    saveScoreHistory(8, 10, "normal");
 
-    const saved = localStorage.getItem('fish-quiz-score-history');
+    const saved = localStorage.getItem("fish-quiz-score-history");
     const parsed = JSON.parse(saved!);
     expect(parsed.entries).toHaveLength(2);
     expect(parsed.entries[0].score).toBe(8); // 最新が先頭
     expect(parsed.entries[1].score).toBe(5); // 古いのが後
   });
 
-  it('最大50件に制限する', () => {
+  it("最大50件に制限する", () => {
     // 51件保存
     for (let i = 0; i < 51; i++) {
-      saveScoreHistory(i, 10, 'normal');
+      saveScoreHistory(i, 10, "normal");
     }
 
-    const saved = localStorage.getItem('fish-quiz-score-history');
+    const saved = localStorage.getItem("fish-quiz-score-history");
     const parsed = JSON.parse(saved!);
     expect(parsed.entries).toHaveLength(50);
     expect(parsed.entries[0].score).toBe(50); // 最新
     expect(parsed.entries[49].score).toBe(1); // 50番目（0番目は削除される）
   });
 
-  it('正解率を正しく計算する', () => {
-    saveScoreHistory(7, 10, 'normal');
+  it("正解率を正しく計算する", () => {
+    saveScoreHistory(7, 10, "normal");
 
-    const saved = localStorage.getItem('fish-quiz-score-history');
+    const saved = localStorage.getItem("fish-quiz-score-history");
     const parsed = JSON.parse(saved!);
     expect(parsed.entries[0].percentage).toBe(70);
   });
 
-  it('ユニークIDを生成する', () => {
-    saveScoreHistory(5, 10, 'normal');
-    saveScoreHistory(8, 10, 'normal');
+  it("ユニークIDを生成する", () => {
+    saveScoreHistory(5, 10, "normal");
+    saveScoreHistory(8, 10, "normal");
 
-    const saved = localStorage.getItem('fish-quiz-score-history');
+    const saved = localStorage.getItem("fish-quiz-score-history");
     const parsed = JSON.parse(saved!);
     expect(parsed.entries[0].id).not.toBe(parsed.entries[1].id);
-    expect(typeof parsed.entries[0].id).toBe('string');
+    expect(typeof parsed.entries[0].id).toBe("string");
   });
 
-  it('localStorageエラーを処理する', () => {
+  it("localStorageエラーを処理する", () => {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = vi.fn().mockImplementation(() => {
-      throw new Error('Storage quota exceeded');
+      throw new Error("Storage quota exceeded");
     });
 
-    expect(() => saveScoreHistory(5, 10, 'normal')).not.toThrow();
+    expect(() => saveScoreHistory(5, 10, "normal")).not.toThrow();
 
     localStorage.setItem = originalSetItem;
   });
 });
 
-describe('loadScoreHistory', () => {
+describe("loadScoreHistory", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('データが存在しない場合はデフォルト構造を返す', () => {
+  it("データが存在しない場合はデフォルト構造を返す", () => {
     const result = loadScoreHistory();
     expect(result).toEqual({ version: 1, entries: [] });
   });
 
-  it('有効なデータを正しくパースする', () => {
+  it("有効なデータを正しくパースする", () => {
     const data = {
       version: 1,
       entries: [createEntry(80), createEntry(60)],
     };
-    localStorage.setItem('fish-quiz-score-history', JSON.stringify(data));
+    localStorage.setItem("fish-quiz-score-history", JSON.stringify(data));
 
     const result = loadScoreHistory();
     expect(result.version).toBe(1);
@@ -271,39 +271,45 @@ describe('loadScoreHistory', () => {
     expect(result.entries[0].percentage).toBe(80);
   });
 
-  it('不正なデータの場合は初期化する', () => {
-    localStorage.setItem('fish-quiz-score-history', JSON.stringify({ invalid: 'data' }));
+  it("不正なデータの場合は初期化する", () => {
+    localStorage.setItem(
+      "fish-quiz-score-history",
+      JSON.stringify({ invalid: "data" }),
+    );
 
     const result = loadScoreHistory();
     expect(result).toEqual({ version: 1, entries: [] });
   });
 
-  it('JSONパースエラーを処理する', () => {
-    localStorage.setItem('fish-quiz-score-history', 'invalid json{');
+  it("JSONパースエラーを処理する", () => {
+    localStorage.setItem("fish-quiz-score-history", "invalid json{");
 
     const result = loadScoreHistory();
     expect(result).toEqual({ version: 1, entries: [] });
   });
 });
 
-describe('clearScoreHistory', () => {
+describe("clearScoreHistory", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('localStorageからデータを削除する', () => {
-    localStorage.setItem('fish-quiz-score-history', JSON.stringify({ version: 1, entries: [] }));
-    expect(localStorage.getItem('fish-quiz-score-history')).not.toBeNull();
+  it("localStorageからデータを削除する", () => {
+    localStorage.setItem(
+      "fish-quiz-score-history",
+      JSON.stringify({ version: 1, entries: [] }),
+    );
+    expect(localStorage.getItem("fish-quiz-score-history")).not.toBeNull();
 
     clearScoreHistory();
 
-    expect(localStorage.getItem('fish-quiz-score-history')).toBeNull();
+    expect(localStorage.getItem("fish-quiz-score-history")).toBeNull();
   });
 
-  it('エラーを処理する', () => {
+  it("エラーを処理する", () => {
     const originalRemoveItem = localStorage.removeItem;
     localStorage.removeItem = vi.fn().mockImplementation(() => {
-      throw new Error('Storage error');
+      throw new Error("Storage error");
     });
 
     expect(() => clearScoreHistory()).not.toThrow();

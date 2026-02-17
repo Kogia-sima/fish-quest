@@ -4,7 +4,7 @@
  * SessionStorageを使用して間違えた問題の復習機能をサポートする
  * @module quizLogic
  */
-import { FishData, RetryQuizData } from './types';
+import type { FishData, RetryQuizData } from "./types";
 
 /**
  * Fisher-Yatesアルゴリズムで配列をランダムに最大N個選択
@@ -12,7 +12,10 @@ import { FishData, RetryQuizData } from './types';
  * @param maxCount 最大選択数（デフォルト: 10）
  * @returns ランダムに選択された魚データの配列
  */
-export function selectRandomFish(fishData: FishData[], maxCount: number = 10): FishData[] {
+export function selectRandomFish(
+  fishData: FishData[],
+  maxCount: number = 10,
+): FishData[] {
   const shuffled = [...fishData].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(maxCount, fishData.length));
 }
@@ -35,15 +38,15 @@ export function checkAnswer(correctName: string, userAnswer: string): boolean {
  */
 export function getScoreMessage(score: number, total: number): string {
   const percentage = (score / total) * 100;
-  if (percentage === 100) return '完璧です！';
-  if (percentage >= 80) return '素晴らしい！';
-  if (percentage >= 60) return 'よくできました！';
-  if (percentage >= 40) return 'もう少し頑張りましょう';
-  return 'もっと勉強が必要です';
+  if (percentage === 100) return "完璧です！";
+  if (percentage >= 80) return "素晴らしい！";
+  if (percentage >= 60) return "よくできました！";
+  if (percentage >= 40) return "もう少し頑張りましょう";
+  return "もっと勉強が必要です";
 }
 
 // SessionStorageのキー（復習データの保存先）
-const STORAGE_KEY = 'quiz-retry-data';
+const STORAGE_KEY = "quiz-retry-data";
 
 /**
  * 間違えた問題をsessionStorageに保存
@@ -54,22 +57,26 @@ const STORAGE_KEY = 'quiz-retry-data';
  */
 export function saveRetryData(
   wrongQuestions: FishData[],
-  settings: { categories: string[]; classifications: string[]; rarities: number[] },
+  settings: {
+    categories: string[];
+    classifications: string[];
+    rarities: number[];
+  },
   score: number,
-  total: number
+  total: number,
 ): void {
   const retryData: RetryQuizData = {
-    mode: 'retry',
+    mode: "retry",
     questions: wrongQuestions,
     originalSettings: settings,
     previousScore: { score, total },
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(retryData));
   } catch (error) {
-    console.error('Failed to save retry data:', error);
+    console.error("Failed to save retry data:", error);
   }
 }
 
@@ -86,14 +93,14 @@ export function loadRetryData(): RetryQuizData | null {
 
     // データ検証
     if (!parsed.mode || !Array.isArray(parsed.questions)) {
-      console.error('Invalid retry data structure');
+      console.error("Invalid retry data structure");
       sessionStorage.removeItem(STORAGE_KEY);
       return null;
     }
 
     return parsed as RetryQuizData;
   } catch (error) {
-    console.error('Failed to load retry data:', error);
+    console.error("Failed to load retry data:", error);
     sessionStorage.removeItem(STORAGE_KEY); // 破損データを削除
     return null;
   }
@@ -106,6 +113,6 @@ export function clearRetryData(): void {
   try {
     sessionStorage.removeItem(STORAGE_KEY);
   } catch (error) {
-    console.error('Failed to clear retry data:', error);
+    console.error("Failed to clear retry data:", error);
   }
 }

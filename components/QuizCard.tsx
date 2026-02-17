@@ -10,10 +10,10 @@
  *
  * @module components/QuizCard
  */
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { FishData, QuizMode } from '@/lib/types';
+import Image from "next/image";
+import type { FishData, QuizMode } from "@/lib/types";
 
 /**
  * QuizCardコンポーネントのProps
@@ -55,19 +55,20 @@ export default function QuizCard({
   onAnswerChange,
   onSubmit,
   onNext,
-  mode = 'normal',
+  mode = "normal",
 }: QuizCardProps) {
   const isLastQuestion = currentIndex === totalQuestions - 1;
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-950">
       {/* Static background gradient */}
-      <div className="absolute inset-0 pointer-events-none"
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
           background: `
             radial-gradient(circle at 25% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
             radial-gradient(circle at 75% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 50%)
-          `
+          `,
         }}
       />
       {/* Answer feedback overlays */}
@@ -81,15 +82,16 @@ export default function QuizCard({
       {/* Main content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-3xl">
-
           {/* Progress indicator */}
           <div className="flex items-center justify-between mb-8 animate-fade-in">
             <div className="flex items-center space-x-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg animate-pulse-glow ${
-                mode === 'retry'
-                  ? 'bg-gradient-to-br from-orange-400 to-rose-500 shadow-orange-500/50'
-                  : 'bg-gradient-to-br from-cyan-400 to-blue-500 shadow-cyan-500/30'
-              }`}>
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg animate-pulse-glow ${
+                  mode === "retry"
+                    ? "bg-gradient-to-br from-orange-400 to-rose-500 shadow-orange-500/50"
+                    : "bg-gradient-to-br from-cyan-400 to-blue-500 shadow-cyan-500/30"
+                }`}
+              >
                 <span className="text-white font-bold">{currentIndex + 1}</span>
               </div>
               <span className="text-cyan-100 text-lg font-medium">
@@ -101,14 +103,15 @@ export default function QuizCard({
             <div className="flex-1 mx-6 h-2 bg-blue-950/80 rounded-full overflow-hidden border border-cyan-500/20">
               <div
                 className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500 ease-out shadow-lg shadow-cyan-500/50"
-                style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
+                style={{
+                  width: `${((currentIndex + 1) / totalQuestions) * 100}%`,
+                }}
               />
             </div>
           </div>
 
           {/* Quiz Card */}
           <div className="bg-gradient-to-br from-blue-900/70 via-cyan-900/60 to-blue-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-cyan-500/10 overflow-hidden animate-slide-up">
-
             {/* Fish Image */}
             <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-950/80 to-cyan-950/80 p-6 sm:p-8">
               <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/50">
@@ -134,7 +137,7 @@ export default function QuizCard({
                   この魚の名前は？
                 </h2>
                 <p className="text-cyan-300/60 text-sm">
-                  {isAnswered ? '回答済み' : '名前を入力してください'}
+                  {isAnswered ? "回答済み" : "名前を入力してください"}
                 </p>
               </div>
 
@@ -149,7 +152,7 @@ export default function QuizCard({
                   className="w-full px-6 py-4 bg-blue-950/80 border-2 border-cyan-500/30 rounded-2xl text-cyan-50 placeholder-cyan-400/40 focus:border-cyan-400 focus:outline-none focus:ring-4 focus:ring-cyan-400/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-lg disabled:bg-blue-950/60"
                   // Enterキーで回答送信（未回答時のみ）
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !isAnswered) {
+                    if (e.key === "Enter" && !isAnswered) {
                       onSubmit();
                     }
                   }}
@@ -158,6 +161,7 @@ export default function QuizCard({
                 {/* Submit Button (before answer) */}
                 {!isAnswered && (
                   <button
+                    type="button"
                     onClick={onSubmit}
                     className="w-full py-4 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-lg font-bold rounded-2xl shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] animate-fade-in-delayed-3"
                   >
@@ -173,8 +177,8 @@ export default function QuizCard({
                   <div
                     className={`p-6 rounded-2xl border-2 ${
                       isCorrect
-                        ? 'bg-emerald-500/20 border-emerald-400/50 animate-success-pulse'
-                        : 'bg-rose-500/20 border-rose-400/50'
+                        ? "bg-emerald-500/20 border-emerald-400/50 animate-success-pulse"
+                        : "bg-rose-500/20 border-rose-400/50"
                     }`}
                   >
                     <div className="flex items-center justify-center space-x-3 mb-3">
@@ -207,10 +211,11 @@ export default function QuizCard({
 
                   {/* Next Button */}
                   <button
+                    type="button"
                     onClick={onNext}
                     className="w-full py-4 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-lg font-bold rounded-2xl shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    {isLastQuestion ? '結果を見る 🎉' : '次へ 🐟'}
+                    {isLastQuestion ? "結果を見る 🎉" : "次へ 🐟"}
                   </button>
                 </div>
               )}

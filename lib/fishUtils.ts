@@ -1,4 +1,4 @@
-import { FishData } from './types';
+import type { FishData } from "./types";
 
 /**
  * すべてのカテゴリーを取得
@@ -6,7 +6,7 @@ import { FishData } from './types';
  * @returns カテゴリーの配列（ソート済み）
  */
 export function getAllCategories(fishData: FishData[]): string[] {
-  const categories = new Set(fishData.map(fish => fish.category));
+  const categories = new Set(fishData.map((fish) => fish.category));
   return Array.from(categories).sort();
 }
 
@@ -18,8 +18,8 @@ export function getAllCategories(fishData: FishData[]): string[] {
 export function getAllClassifications(fishData: FishData[]): string[] {
   const classifications = new Set(
     fishData
-      .map(fish => fish.classification)
-      .filter((c): c is string => c !== null)
+      .map((fish) => fish.classification)
+      .filter((c): c is string => c !== null),
   );
   return Array.from(classifications).sort();
 }
@@ -31,9 +31,7 @@ export function getAllClassifications(fishData: FishData[]): string[] {
  */
 export function getAllRarities(fishData: FishData[]): number[] {
   const rarities = new Set(
-    fishData
-      .map(fish => fish.rarity)
-      .filter((r): r is number => r !== null)
+    fishData.map((fish) => fish.rarity).filter((r): r is number => r !== null),
   );
   return Array.from(rarities).sort((a, b) => a - b);
 }
@@ -46,7 +44,7 @@ export function getAllRarities(fishData: FishData[]): number[] {
  */
 export function getClassificationsByCategories(
   fishData: FishData[],
-  selectedCategories: string[]
+  selectedCategories: string[],
 ): string[] {
   if (selectedCategories.length === 0) {
     return getAllClassifications(fishData);
@@ -54,9 +52,9 @@ export function getClassificationsByCategories(
 
   const classifications = new Set(
     fishData
-      .filter(fish => selectedCategories.includes(fish.category))
-      .map(fish => fish.classification)
-      .filter((c): c is string => c !== null)
+      .filter((fish) => selectedCategories.includes(fish.category))
+      .map((fish) => fish.classification)
+      .filter((c): c is string => c !== null),
   );
   return Array.from(classifications).sort();
 }
@@ -73,10 +71,11 @@ export function filterFishData(
   fishData: FishData[],
   categories: string[],
   classifications: string[],
-  rarities: number[] = []
+  rarities: number[] = [],
 ): FishData[] {
-  return fishData.filter(fish => {
-    const categoryMatch = categories.length === 0 || categories.includes(fish.category);
+  return fishData.filter((fish) => {
+    const categoryMatch =
+      categories.length === 0 || categories.includes(fish.category);
     const classificationMatch =
       classifications.length === 0 ||
       (fish.classification && classifications.includes(fish.classification));

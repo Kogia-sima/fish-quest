@@ -47,7 +47,7 @@ export interface QuizQuestion {
  */
 export interface RetryQuizData {
   /** クイズモード（常に 'retry'） */
-  mode: 'retry';
+  mode: "retry";
   /** 間違えた問題の配列 */
   questions: FishData[];
   /** 元のクイズのフィルター設定 */
@@ -68,7 +68,7 @@ export interface RetryQuizData {
 /**
  * クイズモードの型定義
  */
-export type QuizMode = 'normal' | 'retry';
+export type QuizMode = "normal" | "retry";
 
 /**
  * スコア履歴のエントリー
