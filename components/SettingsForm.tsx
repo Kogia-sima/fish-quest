@@ -80,6 +80,47 @@ function useToggleSelection<T>(initialValue: T[] = []) {
 }
 
 /**
+ * 数字のカウントアップ・カウントダウンアニメーションを管理するカスタムフック
+ * @param targetValue 目標値
+ * @param duration アニメーション時間（ミリ秒）
+ * @returns 現在のアニメーション中の値
+ */
+function useCountUp(targetValue: number, duration = 500) {
+  const [displayValue, setDisplayValue] = useState(targetValue);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    const startValue = displayValue;
+    const difference = targetValue - startValue;
+
+    if (difference === 0) return;
+
+    setIsAnimating(true);
+    const startTime = Date.now();
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // easeOutCubic イージング関数で滑らかなアニメーション
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const currentValue = Math.round(startValue + difference * easeProgress);
+
+      setDisplayValue(currentValue);
+
+      if (progress >= 1) {
+        clearInterval(timer);
+        setDisplayValue(targetValue);
+        setIsAnimating(false);
+      }
+    }, 16); // 約60fps
+
+    return () => clearInterval(timer);
+  }, [targetValue, duration]);
+
+  return { displayValue, isAnimating };
+}
+
+/**
  * ドロップダウンの外側クリックを検出してメニューを閉じるカスタムフック
  * ポータル化されたドロップダウンの制御に使用する
  * @param ref 監視対象要素のref
@@ -424,6 +465,12 @@ export default function SettingsForm({
     ).length;
   }, [fishData, selectedCategories, selectedClassifications, selectedRarities]);
 
+  // カウントアップアニメーション用のフック
+  const { displayValue: animatedCount, isAnimating } = useCountUp(
+    filteredCount,
+    400,
+  );
+
   /**
    * クイズ開始ボタンのハンドラー
    * フィルター条件をURLパラメータとしてクイズページに渡す
@@ -532,8 +579,12 @@ export default function SettingsForm({
             <div className="flex items-center justify-center p-6 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-cyan-500/10 rounded-2xl border border-cyan-400/20 animate-fade-in-delayed-4">
               <div className="text-center">
                 <p className="text-cyan-200/80 text-sm mb-2">対象の魚</p>
-                <p className="text-5xl font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">
-                  {filteredCount}
+                <p
+                  className={`text-5xl font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent transition-transform duration-200 ${
+                    isAnimating ? "scale-110" : "scale-100"
+                  }`}
+                >
+                  {animatedCount}
                 </p>
                 <p className="text-cyan-200/80 text-sm mt-2">種類</p>
               </div>
