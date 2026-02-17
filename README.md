@@ -32,7 +32,7 @@
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/machida-analytics/fish-name-quiz.git
+git clone https://github.com/Kogia-sima/fish-name-quiz.git
 cd fish-name-quiz
 
 # 依存関係のインストール
