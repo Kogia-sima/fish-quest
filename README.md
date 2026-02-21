@@ -8,6 +8,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+![alt text](./resources/images/screenshot_home.png)
+
 🔗 **[デモを試す](https://izu-fish-zukan.web.app/)** | 📱 **スマホ・タブレット対応**
 
 </div>
