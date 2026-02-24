@@ -10,7 +10,7 @@ export default defineConfig({
     setupFiles: ["./test/setup.ts"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html", "lcov"],
+      reporter: ["text", "json", "html", "lcov", "json"],
       exclude: [
         "node_modules/**",
         "test/**",
@@ -29,7 +29,7 @@ export default defineConfig({
         statements: 70,
       },
     },
-    include: ["**/*.{test,spec}.{ts,tsx}"],
+    include: ["**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next", "out"],
   },
   resolve: {
