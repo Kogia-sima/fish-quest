@@ -49,6 +49,7 @@ next-env.d.ts
 # image files
 *.jpg
 *.png
+!resources/images/*.png
 
 # date files
 fish_images*.jsonl
