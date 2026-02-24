@@ -7,6 +7,8 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![CI](https://github.com/Kogia-sima/fish-quest/actions/workflows/ci.yml/badge.svg)](https://github.com/Kogia-sima/fish-quest/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/github/kogia-sima/fish-quest/graph/badge.svg?token=hJMIYmWzhY)](https://codecov.io/github/kogia-sima/fish-quest)
 
 ![alt text](./resources/images/screenshot_home.png)
 
