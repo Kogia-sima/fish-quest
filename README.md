@@ -2,7 +2,7 @@
 
 # 🐟 Fish Quest
 
-**楽しみながら学べる、魚の知識習得を支援するWebアプリケーション**
+**魚の画像から、魚の名前を当てるクイズアプリケーション**
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
