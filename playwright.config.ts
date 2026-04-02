@@ -6,7 +6,7 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   // テストディレクトリ
-  testDir: "./e2e",
+  testDir: "./test/e2e",
 
   // タイムアウト設定（JSONLロード考慮）
   timeout: 10000,

@@ -128,38 +128,43 @@ pnpm test:coverage     # カバレッジレポート生成
 
 ```
 fish-quest/
-├── app/                      # Next.js App Router
-│   ├── page.tsx             # 設定画面（トップページ）
-│   ├── layout.tsx           # ルートレイアウト
-│   ├── globals.css          # グローバルスタイル
-│   ├── quiz/
-│   │   └── page.tsx         # クイズ画面
-│   ├── result/
-│   │   └── page.tsx         # スコア表示画面
-│   └── history/
-│       └── page.tsx         # スコア履歴画面
+├── src/
+│   ├── app/                     # Next.js App Router
+│   │   ├── page.tsx             # 設定画面（トップページ）
+│   │   ├── layout.tsx           # ルートレイアウト
+│   │   ├── globals.css          # グローバルスタイル
+│   │   ├── quiz/
+│   │   │   └── page.tsx         # クイズ画面
+│   │   ├── result/
+│   │   │   └── page.tsx         # スコア表示画面
+│   │   └── history/
+│   │       └── page.tsx         # スコア履歴画面
+│   │
+│   ├── components/              # Reactコンポーネント
+│   │   ├── SettingsForm.tsx     # 設定画面のフォームUI
+│   │   ├── QuizCard.tsx         # クイズ問題表示カード
+│   │   ├── ResultDisplay.tsx    # 結果表示コンポーネント
+│   │   └── HistoryChart.tsx     # スコア履歴グラフ
+│   │
+│   └── lib/                     # ビジネスロジックとユーティリティ
+│       ├── types.ts             # TypeScript型定義
+│       ├── fishData.ts          # 魚データの読み込み・フィルタリング
+│       ├── quizLogic.ts         # クイズロジック（ランダム選定、判定、復習データ管理）
+│       └── historyLogic.ts      # スコア履歴管理（localStorage操作）
 │
-├── components/               # Reactコンポーネント
-│   ├── SettingsForm.tsx     # 設定画面のフォームUI
-│   ├── QuizCard.tsx         # クイズ問題表示カード
-│   ├── ResultDisplay.tsx    # 結果表示コンポーネント
-│   └── HistoryChart.tsx     # スコア履歴グラフ
+├── test/                        # テスト
+│   ├── setup.ts                 # Vitestセットアップ
+│   ├── mocks/                   # テストモック
+│   └── e2e/                     # E2Eテスト（Playwright）
 │
-├── lib/                      # ビジネスロジックとユーティリティ
-│   ├── types.ts             # TypeScript型定義
-│   ├── fishData.ts          # 魚データの読み込み・フィルタリング
-│   ├── quizLogic.ts         # クイズロジック（ランダム選定、判定、復習データ管理）
-│   └── historyLogic.ts      # スコア履歴管理（localStorage操作）
+├── public/                      # 静的ファイル
+│   ├── fish_images.jsonl        # 魚データ（905種類）
+│   └── images/                  # 魚の画像ファイル
 │
-├── public/                   # 静的ファイル
-│   ├── fish_images.jsonl    # 魚データ（905種類）
-│   └── images/              # 魚の画像ファイル
-│
-├── package.json             # プロジェクト設定と依存関係
-├── tsconfig.json            # TypeScript設定
-├── tailwind.config.ts       # Tailwind CSS設定
-├── next.config.ts           # Next.js設定
-└── CLAUDE.md                # プロジェクト固有の開発ルール
+├── package.json                 # プロジェクト設定と依存関係
+├── tsconfig.json                # TypeScript設定
+├── next.config.ts               # Next.js設定
+└── CLAUDE.md                    # プロジェクト固有の開発ルール
 ```
 
 ## 🎮 使い方（学習の流れ）

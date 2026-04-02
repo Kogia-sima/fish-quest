@@ -33,18 +33,19 @@ pnpm deploy           # ビルド + Firebase Hosting デプロイ
 
 ```
 <project root directory>/
-├── app/                         # Next.js App Router ページ
-│   ├── layout.tsx               # ルートレイアウト (Server Component)
-│   ├── page.tsx                 # ホーム/設定画面 (Server Component)
-│   ├── globals.css              # グローバルCSS (Tailwind import)
-│   └── <画面名>/
-│       └── page.tsx             # 画面実装 (Client Component)
-├── components/                  # UIコンポーネント
-├── lib/                         # ビジネスロジック/ユーティリティ
+├── src/
+│   ├── app/                     # Next.js App Router ページ
+│   │   ├── layout.tsx           # ルートレイアウト (Server Component)
+│   │   ├── page.tsx             # ホーム/設定画面 (Server Component)
+│   │   ├── globals.css          # グローバルCSS (Tailwind import)
+│   │   └── <画面名>/
+│   │       └── page.tsx         # 画面実装 (Client Component)
+│   ├── components/              # UIコンポーネント
+│   └── lib/                     # ビジネスロジック/ユーティリティ
 ├── test/                        # テストセットアップ
 │   ├── setup.ts                 # Vitest セットアップ (モック/マッチャー拡張)
-│   └── mocks/                   # テストモック
-├── e2e/                         # E2Eテスト
+│   ├── mocks/                   # テストモック
+│   └── e2e/                     # E2Eテスト
 ├── public/                      # 静的アセット
 └── README.md                    # プロジェクトドキュメント
 ```
@@ -54,7 +55,7 @@ pnpm deploy           # ビルド + Firebase Hosting デプロイ
 ### TypeScript
 
 - **strict mode**: `tsconfig.json` で有効化
-- **パスエイリアス**: `@/*` → プロジェクトルート (例: `@/lib/types`, `@/components/QuizCard`)
+- **パスエイリアス**: `@/*` → `src/` (例: `@/lib/types`, `@/components/QuizCard`)
 - **ターゲット**: ES2017
 - **モジュール解決**: bundler
 
@@ -62,13 +63,13 @@ pnpm deploy           # ビルド + Firebase Hosting デプロイ
 
 | 種類 | 命名 | 例 |
 |------|------|-----|
-| ページ | `page.tsx` | `app/quiz/page.tsx` |
-| レイアウト | `layout.tsx` | `app/layout.tsx` |
-| コンポーネント | PascalCase | `components/QuizCard.tsx` |
-| ユーティリティ | camelCase | `lib/quizLogic.ts` |
+| ページ | `page.tsx` | `src/app/quiz/page.tsx` |
+| レイアウト | `layout.tsx` | `src/app/layout.tsx` |
+| コンポーネント | PascalCase | `src/components/QuizCard.tsx` |
+| ユーティリティ | camelCase | `src/lib/quizLogic.ts` |
 
 ### モジュール設計
 
-- **型定義の集約**: `lib/types.ts` に全型を集約
-- **ロジックとUIの分離**: `lib/` にビジネスロジック、`components/` にUI
-- **テストの配置**: `lib/` 内にソースと同階層でテストファイルを配置
+- **型定義の集約**: `src/lib/types.ts` に全型を集約
+- **ロジックとUIの分離**: `src/lib/` にビジネスロジック、`src/components/` にUI
+- **テストの配置**: `src/lib/` 内にソースと同階層でテストファイルを配置
